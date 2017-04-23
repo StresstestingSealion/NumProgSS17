@@ -253,13 +253,17 @@ mm(pmatrix a, pmatrix b, pmatrix t){
 /* Inplace LR-decomposition without pivot search */
 void
 lr_decomp(pmatrix a){
+	int i, j, k;
+	int n = a->rows;
+	int ld = a->ld;
+	double *aa = a->a;
 
 	for (k=1; k <= n; k++){
 		for (i=k+1; i <= n; i++){
-			a[i + k*ld] = a[i + k*ld] / a[k + k*ld];
+			aa[i + k*ld] = aa[i + k*ld] / aa[k + k*ld];
 		}
-		for (i=k+1; i <=n; i+*){
-			a[i + *ld] = a[i + k*ld] - a[k + j*ld];
+		for (i=k+1; i <=n; i++){
+			aa[i + j*ld] -= aa[i + k*ld] * aa[k + j*ld];
 			j++;
 		}
 	}
@@ -268,16 +272,6 @@ lr_decomp(pmatrix a){
 void
 lr_invert(pmatrix a){
   
-  /* ---------------------------------------------- */ 
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */ 
-  /* ---------------------------------------------- */   
 
 }
 
