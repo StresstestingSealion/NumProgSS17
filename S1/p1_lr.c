@@ -254,19 +254,16 @@ mm(pmatrix a, pmatrix b, pmatrix t){
 void
 lr_decomp(pmatrix a){
 
-  /* ---------------------------------------------- */ 
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */ 
-  /* ---------------------------------------------- */  	 
-	
+	for (k=1; k <= n; k++){
+		for (i=k+1; i <= n; i++){
+			a[i + k*ld] = a[i + k*ld] / a[k + k*ld];
+		}
+		for (i=k+1; i <=n; i+*){
+			a[i + *ld] = a[i + k*ld] - a[k + j*ld];
+			j++;
+		}
+	}
 }
-
 /* Inplace inversion of L and R */
 void
 lr_invert(pmatrix a){
