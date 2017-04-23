@@ -255,15 +255,15 @@ void
 lr_decomp(pmatrix a){
 	int i, j, k;
 	int n = a->rows;
-	int ld = a->ld;
+	int lda = a->ld;
 	double *aa = a->a;
 
 	for (k=1; k <= n; k++){
 		for (i=k+1; i <= n; i++){
-			aa[i + k*ld] = aa[i + k*ld] / aa[k + k*ld];
+			aa[i + k*lda] = aa[i + k*lda] / aa[k + k*lda];
 		}
 		for (i=k+1; i <=n; i++){
-			aa[i + j*ld] -= aa[i + k*ld] * aa[k + j*ld];
+			aa[i + j*lda] -= aa[i + k*lda] * aa[k + j*lda];
 			j++;
 		}
 	}
@@ -271,7 +271,9 @@ lr_decomp(pmatrix a){
 /* Inplace inversion of L and R */
 void
 lr_invert(pmatrix a){
-  
+	int lda = a->ld;
+	double *aa = a->a;
+
 
 }
 
