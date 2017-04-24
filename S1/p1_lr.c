@@ -253,20 +253,24 @@ mm(pmatrix a, pmatrix b, pmatrix t){
 /* Inplace LR-decomposition without pivot search */
 void
 lr_decomp(pmatrix a){
-	int i, j, k;
-	int n = a->rows;
-	int lda = a->ld;
-	double *aa = a->a;
 
-	for (k=1; k <= n; k++){
-		for (i=k+1; i <= n; i++){
-			aa[i + k*lda] = aa[i + k*lda] / aa[k + k*lda];
-		}
-		for (i=k+1; i <=n; i++){
-			aa[i + j*lda] -= aa[i + k*lda] * aa[k + j*lda];
-			j++;
-		}
-	}
+    int k, i, j;
+    double *aa = a->a;
+    int n = a->rows;
+    int ld = a->ld;
+
+    for (k = 0; k < n; k++) {
+        printf("%d\n", ld);
+        for (i = k+1; i < n; i++) {
+            aa[i + ld*k] = aa[i + ld*k] / aa[k + k*ld];
+        }
+        for (i = k+1; i < n; i++) {
+            for (j = k+1; j < n; j++) {
+                aa[i + ld*j] = aa[i + ld*k] - aa[i + ld*k] * aa[k + ld*j];
+            }
+        }
+    }
+
 }
 /* Inplace inversion of L and R */
 void
@@ -326,10 +330,16 @@ main (void){
   A = new_2x2_matrix();
   Ainvers= new_2x2_matrix();
   T = new_zero_matrix(n, n);
-  
+
+    // DEBUG
+    print_matrix(Ainvers);
+
   /* LR - decomposition */
   printf("Start decomposition \n");
   lr_decomp(Ainvers);
+
+    // DEBUG
+    print_matrix(Ainvers);
 
   /* Invert L and R */
   printf("Start inversion of L and R \n");
