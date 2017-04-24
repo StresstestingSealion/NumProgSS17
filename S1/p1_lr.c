@@ -250,7 +250,7 @@ mm(pmatrix a, pmatrix b, pmatrix t){
 	
 }
 
-/* Inplace LR-decomposition without pivot search */
+/** Inplace LR-decomposition without pivot search */
 void
 lr_decomp(pmatrix a){
 
@@ -260,28 +260,52 @@ lr_decomp(pmatrix a){
     int ld = a->ld;
 
     for (k = 0; k < n; k++) {
-        printf("%d\n", ld);
         for (i = k+1; i < n; i++) {
             aa[i + ld*k] = aa[i + ld*k] / aa[k + k*ld];
         }
         for (i = k+1; i < n; i++) {
             for (j = k+1; j < n; j++) {
-                aa[i + ld*j] = aa[i + ld*k] - aa[i + ld*k] * aa[k + ld*j];
+                aa[i + ld*j] = aa[i + ld*j] - aa[i + ld*k] * aa[k + ld*j];
             }
+        }
+    }
+}
+/** Inplace inversion of L and R */
+void
+lr_invert(pmatrix a){
+
+    int i,j,k;
+    int sum;
+    int ld = a->ld;
+    int n = a->rows;
+    double *aa = a->a;
+
+    // inversion of L
+    for (i = 0; i < n; i++) {
+        aa[i + i*ld] = 1 / aa[i + i*ld]; // i = j
+        for (j = i+1; j < n; j++) {
+            sum = 0;
+            for (k = i+1; k <= j; k++) {
+                sum += aa[i + k*ld] * aa[k + j*ld];
+            }
+            aa[i + j*ld] = 1 / aa[i + i*ld] * (-1 * sum);
+        }
+    }
+
+    // inversion of R
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < i; j++) {
+            sum = 0;
+            for (k = j+1; k < i; k++) {
+                sum += aa[i + k*ld] * aa[k * j*ld];
+            }
+            aa[i + j*ld] = aa[i + j*ld] + sum;
         }
     }
 
 }
-/* Inplace inversion of L and R */
-void
-lr_invert(pmatrix a){
-	int lda = a->ld;
-	double *aa = a->a;
 
-
-}
-
-/* Inplace multiplication of R^{-1} with L^{-1} */ 
+/** Inplace multiplication of R^{-1} with L^{-1} */
 void
 lr_mm(pmatrix a){
 	
@@ -344,6 +368,9 @@ main (void){
   /* Invert L and R */
   printf("Start inversion of L and R \n");
   lr_invert(Ainvers);
+
+    // DEBUG
+    print_matrix(Ainvers);
 
   /* Multiply  */
   printf("Multiplication of R^{-1} and L^{-1} \n");
