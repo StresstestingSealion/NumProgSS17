@@ -256,20 +256,8 @@ lr_decomp(pmatrix a){
 
 	int i, j, k;
 	int n = a->rows;
-	int lda = a->ld;
 	double *aa = a->a;
     int ld = a->ld;
-
-	for (k=1; k <= n; k++){
-		for (i=k+1; i <= n; i++){
-			aa[i + k*lda] = aa[i + k*lda] / aa[k + k*lda];
-		}
-		for (i=k+1; i <=n; i++){
-			for (j=k+1; j<=n; j++){
-				aa[i + j*lda] -= aa[i + k*lda] * aa[k + j*lda];
-			}
-		}
-	}
 
 
     for (k = 0; k < n; k++) {
@@ -277,7 +265,7 @@ lr_decomp(pmatrix a){
             aa[i + ld*k] = aa[i + ld*k] / aa[k + k*ld];
         }
         for (i = k+1; i < n; i++) {
-            for (j = k+1; j < n; j++) {
+            for (j = k; j < n; j++) {
                 aa[i + ld*j] = aa[i + ld*j] - aa[i + ld*k] * aa[k + ld*j];
             }
         }
