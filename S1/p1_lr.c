@@ -270,6 +270,7 @@ lr_decomp(pmatrix a){
         }
     }
 }
+
 /** Inplace inversion of L and R */
 void
 lr_invert(pmatrix a){
@@ -285,7 +286,7 @@ lr_invert(pmatrix a){
         aa[i + i*ld] = 1 / aa[i + i*ld]; // i = j
         for (j = i+1; j < n; j++) {
             sum = 0;
-            for (k = i+1; k <= j; k++) {
+            for (k = i+1; k < j; k++) {
                 sum += aa[i + k*ld] * aa[k + j*ld];
             }
             aa[i + j*ld] = 1 / aa[i + i*ld] * (-1 * sum);
@@ -296,13 +297,12 @@ lr_invert(pmatrix a){
     for (i = 0; i < n; i++) {
         for (j = 0; j < i; j++) {
             sum = 0;
-            for (k = j+1; k < i; k++) {
+            for (k = j+1; k < i-1; k++) {
                 sum += aa[i + k*ld] * aa[k * j*ld];
             }
-            aa[i + j*ld] = aa[i + j*ld] + sum;
+            aa[i + j*ld] = -1 * (aa[i + j*ld] + sum);
         }
     }
-
 }
 
 /** Inplace multiplication of R^{-1} with L^{-1} */
@@ -375,6 +375,9 @@ main (void){
   /* Multiply  */
   printf("Multiplication of R^{-1} and L^{-1} \n");
   lr_mm(Ainvers);
+
+    // DEBUG
+    print_matrix(Ainvers);
   
   /* Test invers  */
   mm(A, Ainvers, T); 
