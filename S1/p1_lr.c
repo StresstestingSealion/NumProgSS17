@@ -254,11 +254,11 @@ mm(pmatrix a, pmatrix b, pmatrix t){
 void
 lr_decomp(pmatrix a){
 
-<<<<<<< HEAD
 	int i, j, k;
 	int n = a->rows;
 	int lda = a->ld;
 	double *aa = a->a;
+    int ld = a->ld;
 
 	for (k=1; k <= n; k++){
 		for (i=k+1; i <= n; i++){
@@ -270,11 +270,7 @@ lr_decomp(pmatrix a){
 			}
 		}
 	}
-=======
-    int k, i, j;
-    double *aa = a->a;
-    int n = a->rows;
-    int ld = a->ld;
+
 
     for (k = 0; k < n; k++) {
         for (i = k+1; i < n; i++) {
@@ -286,7 +282,6 @@ lr_decomp(pmatrix a){
             }
         }
     }
->>>>>>> master
 }
 
 /** Inplace inversion of L and R */
