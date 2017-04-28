@@ -297,7 +297,7 @@ lr_invert(pmatrix a){
     for (i = n-1; i > 0; i--) {
         for (j = n-1; j < i; j--) {
             sum = 0;
-            for (k = i + 1; k <= j; k++) {
+            for (k = j; k > i+1; k--) {
                 sum += aa[i + k*ld] * aa[k + j*ld];
             }
             aa[i + j*ld] = (1 / aa[i + i*ld]) * (-1 * sum);
