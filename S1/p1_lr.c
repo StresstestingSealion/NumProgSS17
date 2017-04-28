@@ -257,16 +257,16 @@ lr_decomp(pmatrix a){
 	int i, j, k;
 	int n = a->rows;
 	double *aa = a->a;
-    int ld = a->ld;
+        int ld = a->ld;
 
 
     for (k = 0; k < n; k++) {
         for (i = k+1; i < n; i++) {
-            aa[i + ld*k] = aa[i + ld*k] / aa[k + k*ld];
+            aa[i + k*ld] = aa[i + k*ld] / aa[k + k*ld];
         }
         for (i = k+1; i < n; i++) {
             for (j = k+1; j < n; j++) {
-                aa[i + ld*j] = aa[i + ld*j] - aa[i + ld*k] * aa[k + ld*j];
+                aa[i + ld*j] -= aa[i + k*ld] * aa[k + j*ld];
             }
         }
     }
@@ -282,28 +282,27 @@ lr_invert(pmatrix a){
     int n = a->rows;
     double *aa = a->a;
 
-    // inversion of R
-    for (i = n-1; i >= 0; i--) {
-
-        for (j = n-1; j > i; j--) {
-            sum = 0;
-            for (k = i + 1; k <= j; k++) {
-                sum += aa[i + k * ld] * aa[k + j * ld];
-            }
-            aa[i + j * ld] = 1 / aa[i + i * ld] * (-1 * sum);
-        }
-        aa[i + i*ld] = 1 / aa[i + i*ld]; // i = j
-    }
-
     // inversion of L
     for (i = 0; i < n; i++) {
         for (j = 0; j < i; j++) {
-            sum = 0;
+            sum = (int) aa[i + j*ld];
             for (k = j+1; k < i; k++) {
-                sum += aa[i + k*ld] * aa[k * j*ld];
+                sum += aa[i + k*ld] * aa[k + j*ld];
             }
-            aa[i + j*ld] = -1 * (aa[i + j*ld] + sum);
+            aa[i + j*ld] = -1 * sum;
         }
+    }
+
+    // inversion of R
+    for (i = n-1; i >= 0; i--) {
+        for (j = n-1; j > i; j--) {
+            sum = 0;
+            for (k = i +1; k <= j; k++) {
+                sum += aa[i + k * ld] * aa[k + j * ld];
+            }
+            aa[i + j * ld] = (1 / aa[i + i * ld]) * (-1 * sum);
+        }
+        aa[i + i*ld] = 1 / aa[i + i*ld]; // i = j
     }
 }
 
