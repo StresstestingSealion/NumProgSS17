@@ -295,26 +295,16 @@ lr_invert(pmatrix a){
 
     // inversion of R
     for (i = n-1; i > 0; i--) {
-        for (j = n-1; j > i; j--) {
+        for (j = n-1; j < i; j--) {
             sum = 0;
             for (k = i + 1; k <= j; k++) {
                 sum += aa[i + k*ld] * aa[k + j*ld];
             }
             aa[i + j*ld] = (1 / aa[i + i*ld]) * (-1 * sum);
         }
-        aa[i + i*ld] = 1 / aa[i + i*ld]; // i = j
+        aa[i + i*ld] = 1 / aa[i + i*ld]; // i == j
     }
 
-    // inversion of L
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < i; j++) {
-            sum = (int) aa[i + j*ld];
-            for (k = j+1; k < i; k++) {
-                sum += aa[i + k*ld] * aa[k * j*ld];
-            }
-            aa[i + j*ld] = -1 * sum;
-        }
-    }
 }
 
 /** Inplace multiplication of R^{-1} with L^{-1} */
