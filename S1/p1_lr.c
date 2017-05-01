@@ -293,7 +293,6 @@ lr_invert(pmatrix a){
         }
     }
 
-
     // inversion of R
     for (i = n-1; i >= 0; i--) {
         for (j = n-1; j > i; j--) {
@@ -305,7 +304,6 @@ lr_invert(pmatrix a){
         }
         aa[i + i*ld] = 1 / aa[i + i*ld]; // i == j
     }
-
 }
 
 /** Inplace multiplication of R^{-1} with L^{-1} */

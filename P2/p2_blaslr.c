@@ -24,16 +24,17 @@
 static void
 lrdecomp(pmatrix a){
 
-  /* ---------------------------------------------- */ 
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */ 
-  /* ---------------------------------------------- */  
+    int k;
+    int n = a->rows;
+    int ldA = a->ld;
+    double *A = a->a;
+
+    for (k=0; k<n; k++) {
+        scal(n-k-1, 1.0 / A[k+k*ldA], A+(k+1)+k*ldA, 1);
+        ger(n-k-1, n-k-1, -1.0,
+            A+(k+1)+k*ldA, 1, A+k+(k+1)*ldA, ldA,
+            A+(k+1)+(k+1)*ldA, ldA);
+    }
 
 }
 
@@ -41,16 +42,14 @@ lrdecomp(pmatrix a){
 static void
 lowersolve_matrix(int unit, const pmatrix a, pvector b){
 
-  /* ---------------------------------------------- */ 
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */ 
-  /* ---------------------------------------------- */  
+  int k;
+  int n = a->rows;
+  double *L = a->a;
+  int ldL = a->ld;
+  double *bb = b->x;
+
+  for(k=0; k<n; k++)
+    axpy(n-k-1, -bb[k], L+(k+1)+k*ldL, 1, bb+(k+1), 1);
 
 }
 
@@ -58,16 +57,16 @@ lowersolve_matrix(int unit, const pmatrix a, pvector b){
 static void
 uppersolve_matrix(int unit, const pmatrix a, pvector b){
 
-  /* ---------------------------------------------- */ 
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */ 
-  /* ---------------------------------------------- */  
+  int k;
+  int n = a->rows;
+  int ldR = a->ld;
+  double *R = a->a;
+  double *bb = b->x;
+
+  for(k=n; k-->0; ) {
+    bb[k] /= R[k+k*ldR];
+    axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
+  }
 
 }
 
@@ -75,16 +74,6 @@ uppersolve_matrix(int unit, const pmatrix a, pvector b){
 static pmatrix
 invert(const pmatrix a){
 
-  /* ---------------------------------------------- */ 
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */ 
-  /* ---------------------------------------------- */  
 
 }
 
