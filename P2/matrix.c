@@ -21,7 +21,7 @@ new_matrix(int rows, int cols){
   a->rows = rows;
   a->cols = cols;
   a->ld = rows;
-  
+
   return a;
 }
 
@@ -36,7 +36,7 @@ new_zero_matrix(int rows, int cols){
   a->rows = rows;
   a->cols = cols;
   a->ld = rows;
-  
+
   for(i = 0; i < rows; i++){
     for(j = 0; j < cols; j++){
       a->a[i + j *a->ld] = 0.0;
@@ -83,17 +83,17 @@ new_vector(int rows){
 
 pvector
 new_zero_vector(int rows){
-	
+
   pvector x;
   int i;
- 
+
   x = new_vector(rows);
-  
+
   for(i = 0; i < rows; i++){
-	x->x[i] = 0.0;  
+	x->x[i] = 0.0;
   }
-	
-  return x;	
+
+  return x;
 }
 
 void
@@ -106,12 +106,13 @@ del_vector(pvector x)
 
 pvector
 matrix_col(pmatrix a, int i){
-  
+
   pvector x;
-  
+
   assert(i < a->rows);
   x =  new_vector(a->rows);
-  x->x =a->a +(i*(a->rows)); 
+  //free(x->x);
+  x->x =a->a +(i*(a->rows));
 
   return x;
 }
@@ -121,7 +122,7 @@ matrix_col(pmatrix a, int i){
  * Example matrix
  * ------------------------------------------------------------ */
 
-pmatrix 
+pmatrix
 new_diaghilbert_matrix(int rows){
 
   pmatrix a;
@@ -195,7 +196,7 @@ clear_vector(pvector x){
   double *xx = x->x;
   int rows = x->rows;
   int i;
-  
+
   for(i=0; i<rows; i++)
     xx[i] = 0.0;
 }
@@ -217,4 +218,3 @@ print_matrix(pmatrix a){
   }
 
 }
-

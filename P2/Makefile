@@ -1,7 +1,7 @@
 CC = gcc
 
 CFLAGS = -Wall -Werror \
-	 -O3 -funroll-loops -march=native -mtune=native \
+	 -O1 -funroll-loops -march=native -mtune=native \
          -std=c99
 
 all: p2_blaslr

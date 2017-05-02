@@ -73,8 +73,18 @@ uppersolve_matrix(int unit, const pmatrix a, pvector b){
 
 static pmatrix
 invert(const pmatrix a){
+  int i;
+  int n= a->rows;
 
+  pmatrix inva = new_zero_matrix (n,n);
 
+  for (i =0; i<n; i++){
+    pvector v = matrix_col(inva, i);
+    v->x[i]=1;
+    lowersolve_matrix(n,a,v);
+    uppersolve_matrix(n,a,v);
+  }
+  return inva;
 }
 
 /* ============================================================
@@ -89,9 +99,9 @@ main(void){
   double err, err_abs, norm_x;
   int rows;
   int i;
-  
-  rows = 12;
-  
+
+  rows = 8196;
+
   /* ------------------------------------------------------------
    * Hilbert matrix, LR decomposition
    * ------------------------------------------------------------ */
@@ -112,7 +122,7 @@ main(void){
   lrdecomp(a);
   inva = invert(a);
   gemv(false, a->rows, a->cols, 1.0, inva->a, a->ld, b->x, 1, x->x, 1);
-  
+
   err_abs = 0.0;
   norm_x  = 0.0;
   for(i = 0; i < rows; i++) {
@@ -150,7 +160,7 @@ main(void){
   lrdecomp(a);
   inva = invert(a);
   gemv(false, a->rows, a->cols, 1.0, inva->a, a->ld, b->x, 1, x->x, 1);
-  
+
   err_abs = 0.0;
   norm_x  = 0.0;
   for(i = 0; i < rows; i++) {
@@ -167,6 +177,6 @@ main(void){
   del_vector(xrev);
   del_vector(b);
 
-  
+
   return EXIT_SUCCESS;
 }
