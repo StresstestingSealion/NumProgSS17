@@ -100,7 +100,7 @@ main(void){
   int rows;
   int i;
 
-  rows = 8196;
+  rows =2048;
 
   /* ------------------------------------------------------------
    * Hilbert matrix, LR decomposition
