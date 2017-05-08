@@ -67,49 +67,55 @@ lr_decomp_blas(pmatrix a){
 static void
 block_lsolve(int n, int m, const real *L, int ldL, real *B, int ldB){
 
-  /* ---------------------------------------------- */
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */
-  /*     T       O     O     D     D     O     O    */
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */
-  /* ---------------------------------------------- */
+	int k;
 
+	for(k=0; k<n; k++){
+			ger(n-k-1, m, -1.0, L+(k+1)+k*ldL, 1, B+k, ldB, B+(k+1), ldB);
+	}
 }
 
 static void
 block_rsolve_trans(int n, int m, const real *R, int ldR, real *B, int ldB){
 
-  /* ---------------------------------------------- */
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */
-  /*     T       O     O     D     D     O     O    */
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */
-  /* ---------------------------------------------- */
+	int k;
 
+	for(k=0; k<n; k++){
+		scal(m, 1.0/R[k+k*ldR], B+k*ldB, 1);
+		ger(m, n-k-1, -1.0, B+k+ldB, 1, R+k+(k+1)*ldR, ldR, B+(k+1)*ldB, ldB);
+	}
 }
 
 static void
-blocklr_decomp(pmatrix a, int m){
+blocklr_decomp(pmatrix A, int m){
 
-  /* ---------------------------------------------- */
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */
-  /*     T       O     O     D     D     O     O    */
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */
-  /* ---------------------------------------------- */
+	int i, j, k;
+	int n = A->rows;
+	int ldA = A->ld;
+	int oi, oj, ok, ni, nj, nk;
+	real* a = A->a;
 
+	for(k=0; k<m; k++){
+		ok = n * k / m;
+		nk = n * (k+1) / m - ok;
+	//	lrdecomp(a+ok+ok+ldA, ldA);
+
+		for(j=k+1; j<m; j++){
+			oj = n * j / m;
+			nj = n * (j+1) / m - oj;
+
+			block_lsolve(nk, nj, a+ok+ok*ldA, ldA, a+ok+oj*ldA, ldA);
+			block_rsolve_trans(nk, nj, a+ok+ok*ldA, ldA, a+oj+ok*ldA, ldA);
+		}
+		for(j=k+1; j<m; j++){
+			oj = n * j / m;
+			nj = n * (j+1) / m - oj;
+			for(i=k+1; i<m; i++){
+				oi = n * i / m;
+				ni = n * (i+1) / m - oi;
+				gemm(false, false, ni, nj, nk, -1.0, a+oi+ok*ldA, ldA, a+ok+oj*ldA, ldA, 1.0, a+oi+oj*ldA, ldA);
+			}
+		}
+	}
 }
 
 
@@ -122,13 +128,13 @@ main(void){
 
   int n;
   pstopwatch sw;
-  pmatrix A;
-  real time;
+  real time = 0;
   int m;
 
   n = 2000;					/* matrix dimension */
   m = 100;					/* number of matrix parts */
 
+	pmatrix A = new_diaghilbert_matrix(n);
 
 
   /* ------------------------------------------------------------
@@ -140,18 +146,6 @@ main(void){
   /* ------------------------------------------------------------
    * first version of LR decomposition
    * ------------------------------------------------------------ */
-
-  /* ---------------------------------------------- */
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */
-  /*     T       O     O     D     D     O     O    */
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */
-  /* ---------------------------------------------- */
-
 
 
   /* cleaning up */
