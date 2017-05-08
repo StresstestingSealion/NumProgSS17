@@ -27,7 +27,7 @@ new_stopwatch()
   pstopwatch sw;
 
   sw = (pstopwatch) malloc(sizeof(stopwatch));
-  
+
 #ifndef WIN32
   sw->clk_tck = sysconf(_SC_CLK_TCK);
 #endif

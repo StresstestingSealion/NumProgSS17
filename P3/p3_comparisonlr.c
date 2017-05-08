@@ -128,18 +128,22 @@ main(void){
 
   int n;
   pstopwatch sw;
-  real time = 0;
+	real time = 0;
   int m;
 
-  n = 2000;					/* matrix dimension */
+  n = 20;					/* matrix dimension */
   m = 100;					/* number of matrix parts */
 
 	pmatrix A = new_diaghilbert_matrix(n);
-
+	start_stopwatch(sw);
 
   /* ------------------------------------------------------------
    * Block-LR decomposition
    * ------------------------------------------------------------ */
+ lr_decomp(A);
+ time = stop_stopwatch(sw);
+ printf("%d", time);
+
   /* ------------------------------------------------------------
    * 'only' BLAS-LR decomposition
    * ------------------------------------------------------------ */
