@@ -20,21 +20,26 @@
 /* older versions e.g. used in comparsion*/
 /* ************************************************* */
 
-/* P1 */
-static void
+/** Inplace LR-decomposition without pivot search */
+void
 lr_decomp(pmatrix a){
-	
-  /* -------------------------------------------*/ 
-  /*                                            */
-  /*    C C      O O      P P P     Y     Y  	*/
-  /*   C        O   O     P    P     Y   Y 	*/
-  /*  C        O     O    P    P       Y        */ 
-  /*  C        O     O    P P P        Y        */ 
-  /*   C        O   O     P            Y       	*/
-  /*    C C      O O      P            Y       	*/
-  /*                                            */ 
-  /* -------------------------------------------*/ 
-	
+
+	int i, j, k;
+	int n = a->rows;
+	double *aa = a->a;
+        int ld = a->ld;
+
+
+    for (k = 0; k < n; k++) {
+        for (i = k+1; i < n; i++) {
+            aa[i + k*ld] = aa[i + k*ld] / aa[k + k*ld];
+        }
+        for (i = k+1; i < n; i++) {
+            for (j = k+1; j < n; j++) {
+                aa[i + ld*j] -= aa[i + k*ld] * aa[k + j*ld];
+            }
+        }
+    }
 }
 
 /* P2 (with slightly changed name) */
@@ -42,17 +47,17 @@ lr_decomp(pmatrix a){
 static void
 lr_decomp_blas(pmatrix a){
 
-  /* -------------------------------------------*/ 
-  /*                                            */
-  /*    C C      O O      P P P     Y     Y  	*/
-  /*   C        O   O     P    P     Y   Y 	*/
-  /*  C        O     O    P    P       Y        */ 
-  /*  C        O     O    P P P        Y        */ 
-  /*   C        O   O     P            Y       	*/
-  /*    C C      O O      P            Y       	*/
-  /*                                            */ 
-  /* -------------------------------------------*/ 
+    int k;
+    int n = a->rows;
+    int ldA = a->ld;
+    double *A = a->a;
 
+    for (k=0; k<n; k++) {
+        scal(n-k-1, 1.0 / A[k+k*ldA], A+(k+1)+k*ldA, 1);
+        ger(n-k-1, n-k-1, -1.0,
+            A+(k+1)+k*ldA, 1, A+k+(k+1)*ldA, ldA,
+            A+(k+1)+(k+1)*ldA, ldA);
+    }
 }
 
 
@@ -62,31 +67,31 @@ lr_decomp_blas(pmatrix a){
 static void
 block_lsolve(int n, int m, const real *L, int ldL, real *B, int ldB){
 
-  /* ---------------------------------------------- */ 
+  /* ---------------------------------------------- */
   /*                                                */
   /* T T T T T     O O       D D           O O      */
   /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
+  /*     T       O     O     D     D     O     O    */
+  /*     T       O     O     D     D     O     O    */
   /*     T        O   O      D   D        O   O     */
   /*     T         O O       D D           O O      */
-  /*                                                */ 
+  /*                                                */
   /* ---------------------------------------------- */
 
 }
 
 static void
 block_rsolve_trans(int n, int m, const real *R, int ldR, real *B, int ldB){
-  
-  /* ---------------------------------------------- */ 
+
+  /* ---------------------------------------------- */
   /*                                                */
   /* T T T T T     O O       D D           O O      */
   /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
+  /*     T       O     O     D     D     O     O    */
+  /*     T       O     O     D     D     O     O    */
   /*     T        O   O      D   D        O   O     */
   /*     T         O O       D D           O O      */
-  /*                                                */ 
+  /*                                                */
   /* ---------------------------------------------- */
 
 }
@@ -94,15 +99,15 @@ block_rsolve_trans(int n, int m, const real *R, int ldR, real *B, int ldB){
 static void
 blocklr_decomp(pmatrix a, int m){
 
-  /* ---------------------------------------------- */ 
+  /* ---------------------------------------------- */
   /*                                                */
   /* T T T T T     O O       D D           O O      */
   /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
+  /*     T       O     O     D     D     O     O    */
+  /*     T       O     O     D     D     O     O    */
   /*     T        O   O      D   D        O   O     */
   /*     T         O O       D D           O O      */
-  /*                                                */ 
+  /*                                                */
   /* ---------------------------------------------- */
 
 }
@@ -112,7 +117,7 @@ blocklr_decomp(pmatrix a, int m){
  * Main program
  * ============================================================ */
 
-int 
+int
 main(void){
 
   int n;
@@ -125,7 +130,7 @@ main(void){
   m = 100;					/* number of matrix parts */
 
 
-  
+
   /* ------------------------------------------------------------
    * Block-LR decomposition
    * ------------------------------------------------------------ */
@@ -136,19 +141,19 @@ main(void){
    * first version of LR decomposition
    * ------------------------------------------------------------ */
 
-  /* ---------------------------------------------- */ 
+  /* ---------------------------------------------- */
   /*                                                */
   /* T T T T T     O O       D D           O O      */
   /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
+  /*     T       O     O     D     D     O     O    */
+  /*     T       O     O     D     D     O     O    */
   /*     T        O   O      D   D        O   O     */
   /*     T         O O       D D           O O      */
-  /*                                                */ 
+  /*                                                */
   /* ---------------------------------------------- */
-  
-  
- 
+
+
+
   /* cleaning up */
   del_stopwatch(sw);
 
