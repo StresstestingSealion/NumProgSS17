@@ -131,7 +131,7 @@ main(void) {
     real time = 0;
     int m;
 
-    printf("WARNING: program might not terminate in time for big problem dimensions");
+    printf("WARNING: program might not terminate in time for big problem dimensions\n");
 
     n = 512;                    /* matrix dimension */
     m = 16;                    /* number of matrix parts */
