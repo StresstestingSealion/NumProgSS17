@@ -131,35 +131,47 @@ main(void) {
     real time = 0;
     int m;
 
-    n = 2000;                    /* matrix dimension */
-    m = 50;                    /* number of matrix parts */
+    printf("WARNING: program might not terminate in time for big problem dimensions");
 
+    n = 512;                    /* matrix dimension */
+    m = 16;                    /* number of matrix parts */
+
+  for(; n<=32784; n*=2){
     pmatrix A = new_diaghilbert_matrix(n);
+    pmatrix B = new_diaghilbert_matrix(n);
+    pmatrix C = new_diaghilbert_matrix(n);
 
+    printf("Matrix dimension: %d \n", n);
+    printf("Block size: %d \n", m);
     /* ------------------------------------------------------------
      * Block-LR decomposition
      * ------------------------------------------------------------ */
-    start_stopwatch(sw);
-    blocklr_decomp(A,m);
-    time = stop_stopwatch(sw);
-    printf("Block: %f\n", time);
-
+//     for(;m<=n; m*=2){ used for testing block sizes
+      start_stopwatch(sw);
+      blocklr_decomp(A,m);
+      time = stop_stopwatch(sw);
+      printf("%f s using block decomp\n", time);
+//    }
     /* ------------------------------------------------------------
      * 'only' BLAS-LR decomposition
      * ------------------------------------------------------------ */
     start_stopwatch(sw);
-    lr_decomp_blas(A);
+    lr_decomp_blas(B);
     time = stop_stopwatch(sw);
-    printf("BLAS: %f\n", time);
+    printf("%f s utilizing BLAS\n", time);
 
     /* ------------------------------------------------------------
      * first version of LR decomposition
      * ------------------------------------------------------------ */
     start_stopwatch(sw);
-    lr_decomp(A);
+    lr_decomp(C);
     time = stop_stopwatch(sw);
-    printf("manual: %f\n", time);
+    printf("%f s non-optimized\n", time);
 
+    del_matrix(A);
+    del_matrix(B);
+    del_matrix(C);
+}
 
     /* cleaning up */
     del_stopwatch(sw);
