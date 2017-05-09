@@ -1,0 +1,20 @@
+# Dimension Block_Decomp BLAS non-optimized
+512 0.05
+1024  0.37
+2048  2.25
+4096 43.81
+
+512  0.05
+1024  0.7
+2048  5.88
+4096  49.35
+
+512 0.33
+1024  10.83
+2048  125.00
+4096
+
+#set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 7 ps 1.5
+#set style line 2 lc rgb '#dd181f' lt 1 lw 2 pt 5 ps 1.5
+#set style line 3 lc rgb '#00ff00' lt 1 lw 2 pt 5 ps 1.5
+#plot "method_comparision.dat"  index 0 with linespoints ls 1
