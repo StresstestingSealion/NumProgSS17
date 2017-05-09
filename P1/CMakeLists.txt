@@ -1,0 +1,1 @@
+add_executable(P1 p1_lr.c)

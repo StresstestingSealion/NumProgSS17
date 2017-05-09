@@ -115,16 +115,8 @@ matrix_col(pmatrix a, int i){
 pmatrix
 init_sub_matrix(pmatrix asub, pmatrix a, int rows, int roff, int cols, int coff){
 
-  /* ---------------------------------------------- */ 
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */ 
-  /* ---------------------------------------------- */
+    // not final
+    return new_matrix(1,1);
 
 }
 
