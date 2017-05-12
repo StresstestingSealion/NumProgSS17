@@ -92,11 +92,13 @@ blocklr_decomp(pmatrix A, int m) {
     int ldA = A->ld;
     int oi, oj, ok, ni, nj, nk;
     real *a = A->a;
+    pmatrix asub = malloc(sizeof(A));
 
     for (k = 0; k < m; k++) {
         ok = n * k / m;
         nk = n * (k + 1) / m - ok;
-        //	lrdecomp(a+ok+ok+ldA, ldA);
+        init_sub_matrix(asub, A, nk, ok, nk, ok);
+        lr_decomp_blas(asub);
 
         for (j = k + 1; j < m; j++) {
             oj = n * j / m;
