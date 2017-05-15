@@ -19,6 +19,94 @@
 /* ------------------------------------------------------------
  * LR decomposition and solve
  * ------------------------------------------------------------ */
+ static void convert_to_pmatrix(pmatrix p, ptridiag a){
+
+ int k;
+ double *A = p->a;
+ int ldA = p->ld;
+
+ for(k=0; k<a->rows-1; k++){
+   A[(k+1)+k*ldA]= a->l[k];
+   A[k + k*ldA]=a->d[k];
+   A[k+(k+1)*ldA]=a->u[k];
+ }
+   k= a->rows-1;
+   A[k+k*ldA]=a->d[k];
+ }
+
+ static void convert_to_ptridiag(pmatrix p, ptridiag a){
+   int k;
+   double *A = p->a;
+   int ldA = p->ld;
+
+   for(k=0; k<a->rows-1; k++){
+     A[(k+1)*ldA]=a->l[k];
+     A[k+k*ldA]=a->d[k];
+     A[k+(k+1)*ldA]=a->u[k];
+   }
+     k= a->rows-1;
+     A[k+k*ldA]=a->d[k];
+ }
+
+ static void
+ lowersolve_matrix(int unit, const pmatrix a, pvector b){
+
+   int k;
+   int n = a->rows;
+   double *L = a->a;
+   int ldL = a->ld;
+   double *bb = b->x;
+
+   if(unit != 0){
+     for(k=0; k<n; k++)
+       axpy(n-k-1, -bb[k], L+(k+1)+k*ldL, 1, bb+(k+1), 1);
+   }
+   else{
+     for(k=0; k<=n; k++)
+       axpy(n-k-1, -bb[k], L+(k+1)+k*ldL, 1, bb+(k+1), 1);
+   }
+ }
+
+
+ static void
+ uppersolve_matrix(int unit, const pmatrix a, pvector b){
+
+   int k;
+   int n = a->rows;
+   int ldR = a->ld;
+   double *R = a->a;
+   double *bb = b->x;
+
+   if(unit != 0){
+     for(k=n; k-->0; ) {
+       bb[k] /= R[k+k*ldR];
+       axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
+     }
+   }
+   else{
+     for(k=n; k-->0; ) {
+       bb[k] /= R[k+k*ldR];
+       axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
+     }
+   }
+ }
+
+ static void
+ lrdecomp(pmatrix a){
+
+     int k;
+     int n = a->rows;
+     int ldA = a->ld;
+     double *A = a->a;
+
+     for (k=0; k<n; k++) {
+         scal(n-k-1, 1.0 / A[k+k*ldA], A+(k+1)+k*ldA, 1);
+         ger(n-k-1, n-k-1, -1.0,
+             A+(k+1)+k*ldA, 1, A+k+(k+1)*ldA, ldA,
+             A+(k+1)+(k+1)*ldA, ldA);
+     }
+
+ }
 
 static void
 tridiag_lrdecomp(ptridiag a){
@@ -35,8 +123,8 @@ int n = p->cols;
 convert_to_pmatrix(p, a);
 
 for(k=0; k<n; k++){
-  scal(n-k-1, 1.0 / A[k+k*ldA], A+(k+1)+*ldA, 1);
-  ger (n-k-1, n-k-1, -1.0, A+(k+1)+k*ldA, 1, A+k+(k+1)*ldA)
+  scal(n-k-1, 1.0 / A[k+k*ldA], A+(k+1)*ldA, 1);
+  ger (n-k-1, n-k-1, -1.0, A+(k+1)+k*ldA, 1, A+k+(k+1)*ldA, 1, A+k+(k+1)*ldA, 1);
 }
 
 convert_to_ptridiag(p, a);
@@ -55,34 +143,7 @@ del_matrix(p);
 
 }
 
-static void convert_to_pmatrix(pmatrixp, ptridiag a){
 
-int k;
-double *A = p->a;
-int ldA = p->ld;
-
-for(k=0; k<a->rows-1; k++){
-  A[(k+1)+k*ldA]= a->l[k];
-  A[k + k*ldA]=a->d[k];
-  A[k+(k+1)*ldA]=a->u[k];
-}
-  k= a->rows-1;
-  A[k+k*ldA]=a->d[k];
-}
-
-static void convert_to_ptridiag(pmatrix p, ptrdiag a){
-  int k;
-  double *A = p->a;
-  int ldA = p->ld;
-
-  for(k=0; k<a->rows-1; k++){
-    A[(k+1)+*ldA]=a->l[k];
-    A[k+k*ldA]=a->d[k];
-    A[k+(k+1)*ldA]=a->u[k];
-  }
-    k= a->rows-1;
-    A[k+k*ldA]=a->d[k];
-}
 
 /* ------------------------------------------------------------
  * inverse iteration
@@ -100,8 +161,7 @@ static void convert_to_ptridiag(pmatrix p, ptrdiag a){
 static void
 inverse_iteration(ptridiag a, pvector x, int steps, double *eigenvalue, double *res){
 
-tridiag_lrdecomp(a);
-
+//inverse_iteration_withshift(a, x, 0.0, steps, *eigenvalue, *res);
 
 }
 
@@ -112,16 +172,7 @@ tridiag_lrdecomp(a);
 static void
 inverse_iteration_withshift(ptridiag a, pvector x, double shift, int steps, double *eigenvalue, double *res){
 
-  /* ---------------------------------------------- */
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */
-  /*     T       O     O     D     D     O     O    */
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */
-  /* ---------------------------------------------- */
+tridiag_lrdecomp(a);
 
 }
 
