@@ -21,7 +21,7 @@ new_matrix(int rows, int cols){
   a->rows = rows;
   a->cols = cols;
   a->ld = rows;
-  
+
   return a;
 }
 
@@ -76,17 +76,17 @@ new_vector(int rows){
 
 pvector
 new_zero_vector(int rows){
-	
+
   pvector x;
   int i;
- 
+
   x = new_vector(rows);
-  
+
   for(i = 0; i < rows; i++){
-	x->x[i] = 0.0;  
+	x->x[i] = 0.0;
   }
-	
-  return x;	
+
+  return x;
 }
 
 void
@@ -102,22 +102,22 @@ del_vector(pvector x)
 pmatrix
 init_sub_matrix(pmatrix asub, pmatrix a, int rows, int roff, int cols, int coff){
 
-  /* -------------------------------------------*/ 
+  /* -------------------------------------------*/
   /*                                            */
   /*    C C      O O      P P P     Y     Y  	*/
   /*   C        O   O     P    P     Y   Y 	*/
-  /*  C        O     O    P    P       Y        */ 
-  /*  C        O     O    P P P        Y        */ 
+  /*  C        O     O    P    P       Y        */
+  /*  C        O     O    P P P        Y        */
   /*   C        O   O     P            Y       	*/
   /*    C C      O O      P            Y       	*/
-  /*                                            */ 
-  /* -------------------------------------------*/ 
+  /*                                            */
+  /* -------------------------------------------*/
 
 }
 
-ptridiag 
+ptridiag
 new_tridiag(int rows){
-	
+
   ptridiag a;
 
   assert(rows >= 1);
@@ -136,12 +136,12 @@ new_tridiag(int rows){
 
 void
 del_tridiag(ptridiag a){
-	
+
   free(a->u);
   free(a->l);
   free(a->d);
   free(a);
-  
+
 }
 
 
@@ -149,7 +149,7 @@ del_tridiag(ptridiag a){
  * Example matrix
  * ------------------------------------------------------------ */
 
-pmatrix 
+pmatrix
 new_diaghilbert_matrix(int rows){
 
   pmatrix a;
@@ -201,7 +201,7 @@ new_hilbert_matrix(int rows){
 
 ptridiag
 new_threepointstencil(int rows){
-	
+
   ptridiag a;
   double *ad, *al, *au;
   double h = 1.0 / (rows + 1);
@@ -222,7 +222,7 @@ new_threepointstencil(int rows){
   ad[rows-1] = d;
 
 
-  return a;	
+  return a;
 }
 
 /* ------------------------------------------------------------
@@ -249,7 +249,7 @@ clear_vector(pvector x){
   double *xx = x->x;
   int rows = x->rows;
   int i;
-  
+
   for(i=0; i<rows; i++)
     xx[i] = 0.0;
 }
@@ -286,43 +286,43 @@ random_vector(pvector x)
 
 double
 normmax_vector(const pvector x){
-	
+
   double norm = 0.0;
   double * xx= x->x;
   int i;
 
   for(i = 0; i < x->rows; i++){
-    norm = (norm < fabs(xx[i]) ? fabs(xx[i]) : norm);   
-  }  
-	
-  return norm;	
+    norm = (norm < fabs(xx[i]) ? fabs(xx[i]) : norm);
+  }
+
+  return norm;
 }
 
 double
 normmax_diff_vector(const pvector x, const pvector y){
-	
+
   double error = 0.0;
   int i;
-  
+
   assert(x->rows == y->rows);
-  
+
   for(i = 0; i < x->rows; i++){
     error = ((fabs(x->x[i] - y->x[i])) > error ? (fabs(x->x[i] - y->x[i])) : error);
   }
-   
-  return error;	
+
+  return error;
 }
 
 double
 norm2_diff_vector(const pvector x, const pvector y){
-	
+
   double *diff;
   double norm;
   int i;
-  
+
   assert(x->rows == y->rows);
   diff = (double *) malloc(sizeof(double) * x->rows);
-  
+
   for(i = 0; i < x->rows; i++){
 	diff[i] = x->x[i] - y->x[i];
   }
@@ -336,7 +336,7 @@ norm2_diff_vector(const pvector x, const pvector y){
 
 void
 copy_tridiag(const ptridiag a, ptridiag b){
-	
+
   const double *ad = a->d;
   const double *al = a->l;
   const double *au = a->u;
@@ -349,17 +349,17 @@ copy_tridiag(const ptridiag a, ptridiag b){
   assert(b->rows == rows);
 
   for(i = 0; i < rows- 1; i++){
-	bd[i] = ad[i]; 
+	bd[i] = ad[i];
 	bl[i] = al[i];
         bu[i] = au[i];
   }
-  	bd[rows-1] = ad[rows-1]; 
+  	bd[rows-1] = ad[rows-1];
 
 }
 
 ptridiag
 clone_tridiag(const ptridiag a){
-	
+
   ptridiag b;
 
   b = new_tridiag(a->rows);
@@ -406,8 +406,7 @@ mvm_tridiag(int trans, double alpha, const ptridiag a,
     yx[0] += alpha * (ad[0] * xx[0] + au[0] * xx[1]);
     for(i = 1; i < rows-1; i++){
       yx[i] += alpha * (al[i-1] * xx[i-1] + ad[i] * xx[i] + au[i] * xx[i+1]);
-    } 
+    }
     yx[i] += alpha * (al[i-1] * xx[i-1] + ad[i] * xx[i]);
   }
 }
-
