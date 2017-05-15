@@ -103,16 +103,11 @@ del_vector(pvector x)
 pmatrix
 init_sub_matrix(pmatrix asub, pmatrix a, int rows, int roff, int cols, int coff){
 
-  /* -------------------------------------------*/
-  /*                                            */
-  /*    C C      O O      P P P     Y     Y  	*/
-  /*   C        O   O     P    P     Y   Y 	*/
-  /*  C        O     O    P    P       Y        */
-  /*  C        O     O    P P P        Y        */
-  /*   C        O   O     P            Y       	*/
-  /*    C C      O O      P            Y       	*/
-  /*                                            */
-  /* -------------------------------------------*/
+    asub->a = a->a[roff + coff * a->ld];
+    asub->rows = rows;
+    asub->cols = cols;
+    asub->ld = a->ld;
+    return a;
 
 }
 
