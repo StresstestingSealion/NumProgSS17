@@ -5,4 +5,5 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra -g -Werror -O3 -funr
 add_subdirectory(P1)
 add_subdirectory(P2)
 add_subdirectory(P3)
+add_subdirectory(P4)
 add_subdirectory(glut)

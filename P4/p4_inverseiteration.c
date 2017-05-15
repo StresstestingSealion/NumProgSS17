@@ -35,100 +35,52 @@
  }
 
  static void convert_to_ptridiag(pmatrix p, ptridiag a){
-   int k;
-   double *A = p->a;
-   int ldA = p->ld;
+    int k;
+    double *A = p->a;
+    int ldA = p->ld;
 
-   for(k=0; k<a->rows-1; k++){
-     A[(k+1)*ldA]=a->l[k];
-     A[k+k*ldA]=a->d[k];
-     A[k+(k+1)*ldA]=a->u[k];
-   }
-     k= a->rows-1;
-     A[k+k*ldA]=a->d[k];
- }
-
- static void
- lowersolve_matrix(int unit, const pmatrix a, pvector b){
-
-   int k;
-   int n = a->rows;
-   double *L = a->a;
-   int ldL = a->ld;
-   double *bb = b->x;
-
-   if(unit != 0){
-     for(k=0; k<n; k++)
-       axpy(n-k-1, -bb[k], L+(k+1)+k*ldL, 1, bb+(k+1), 1);
-   }
-   else{
-     for(k=0; k<=n; k++)
-       axpy(n-k-1, -bb[k], L+(k+1)+k*ldL, 1, bb+(k+1), 1);
-   }
- }
-
-
- static void
- uppersolve_matrix(int unit, const pmatrix a, pvector b){
-
-   int k;
-   int n = a->rows;
-   int ldR = a->ld;
-   double *R = a->a;
-   double *bb = b->x;
-
-   if(unit != 0){
-     for(k=n; k-->0; ) {
-       bb[k] /= R[k+k*ldR];
-       axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
-     }
-   }
-   else{
-     for(k=n; k-->0; ) {
-       bb[k] /= R[k+k*ldR];
-       axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
-     }
-   }
- }
-
- static void
- lrdecomp(pmatrix a){
-
-     int k;
-     int n = a->rows;
-     int ldA = a->ld;
-     double *A = a->a;
-
-     for (k=0; k<n; k++) {
-         scal(n-k-1, 1.0 / A[k+k*ldA], A+(k+1)+k*ldA, 1);
-         ger(n-k-1, n-k-1, -1.0,
-             A+(k+1)+k*ldA, 1, A+k+(k+1)*ldA, ldA,
-             A+(k+1)+(k+1)*ldA, ldA);
-     }
-
- }
+    for(k=0; k<a->rows-1; k++){
+        A[(k+1)*ldA]=a->l[k];
+        A[k+k*ldA]=a->d[k];
+        A[k+(k+1)*ldA]=a->u[k];
+    }
+    k= a->rows-1;
+    A[k+k*ldA]=a->d[k];
+}
 
 static void
 tridiag_lrdecomp(ptridiag a){
 
-int k;
-int rows = a->rows;
-pmatrix p = new_zero_matrix(rows, rows);
+    /*
+     * Tridiagnonalmatrix mit "Informatik-Variablen"
+     *
+     * d0 u0 00 00
+     * l0 d1 u1 00
+     * 00 l1 d2 u2
+     * 00 00 l2 d3
+     *
+     * wird zerlegt in zwei Matritzen
+     *
+     * 01 00 00 00    b0 c0 00 00
+     * a0 01 00 00    00 b1 c1 00
+     * 00 a1 01 00    00 00 b2 c2
+     * 00 00 a2 01    00 00 00 b3
+     *
+     */
 
+    double *d = a->d;
+    double *l = a->l;
+    double *u = a->u;
+    int n = a->rows;
+    int i;
 
-double *A = p->a;
-int ldA = p->ld;
-int n = p->cols;
+    for (i = 1; i < n-1; i++) {
+        l[i-1] /= d[i-1];
+        d[i] -= l[i-1] * u[i-1];
+    }
 
-convert_to_pmatrix(p, a);
-
-for(k=0; k<n; k++){
-  scal(n-k-1, 1.0 / A[k+k*ldA], A+(k+1)*ldA, 1);
-  ger (n-k-1, n-k-1, -1.0, A+(k+1)+k*ldA, 1, A+k+(k+1)*ldA, 1, A+k+(k+1)*ldA, 1);
-}
-
-convert_to_ptridiag(p, a);
-del_matrix(p);
+    l[n-2] /= d[n-2];
+    d[n-1] -= l[n-2] * u[n-2];
 
 }
 
