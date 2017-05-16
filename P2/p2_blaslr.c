@@ -48,7 +48,7 @@ lowersolve_matrix(int unit, const pmatrix a, pvector b){
   int ldL = a->ld;
   double *bb = b->x;
 
-  if(unit != 0){
+  if(unit){
     for(k=0; k<n; k++)
       axpy(n-k-1, -bb[k], L+(k+1)+k*ldL, 1, bb+(k+1), 1);
   }
@@ -68,14 +68,14 @@ uppersolve_matrix(int unit, const pmatrix a, pvector b){
   double *R = a->a;
   double *bb = b->x;
 
-  if(unit != 0){
+  if(unit){
     for(k=n; k-->0; ) {
       bb[k] /= R[k+k*ldR];
       axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
     }
   }
   else{
-    for(k=n; k-->0; ) {
+    for(k=n; k-->=0; ) {
       bb[k] /= R[k+k*ldR];
       axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
     }
