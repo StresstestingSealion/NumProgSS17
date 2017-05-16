@@ -1,0 +1,21 @@
+/tmp/ccSeVGrl.o: In Funktion `lowersolve_matrix':
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:34: Nicht definierter Verweis auf `axpy'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:38: Nicht definierter Verweis auf `axpy'
+/tmp/ccSeVGrl.o: In Funktion `uppersolve_matrix':
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:55: Nicht definierter Verweis auf `axpy'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:61: Nicht definierter Verweis auf `axpy'
+/tmp/ccSeVGrl.o: In Funktion `tridiag_lrdecomp':
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:71: Nicht definierter Verweis auf `new_zero_matrix'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:87: Nicht definierter Verweis auf `scal'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:88: Nicht definierter Verweis auf `ger'
+/tmp/ccSeVGrl.o: In Funktion `tridiag_lrsolve':
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:106: Nicht definierter Verweis auf `new_zero_matrix'
+/tmp/ccSeVGrl.o: In Funktion `main':
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:195: Nicht definierter Verweis auf `new_threepointstencil'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:196: Nicht definierter Verweis auf `new_vector'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:197: Nicht definierter Verweis auf `random_vector'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:215: Nicht definierter Verweis auf `random_vector'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:233: Nicht definierter Verweis auf `random_vector'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:243: Nicht definierter Verweis auf `del_vector'
+/home/fabian/NumProgSS17/P4/p4_inverseiteration.c:244: Nicht definierter Verweis auf `del_tridiag'
+collect2: error: ld returned 1 exit status
