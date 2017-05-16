@@ -32,7 +32,7 @@ new_zero_matrix(int rows, int cols){
   pmatrix a;
 
   a = calloc(1, sizeof(matrix));
-  a->a = calloc(rows * cols, sizeof(double));
+  a->a = calloc((size_t) (rows * cols), sizeof(double));
   a->rows = rows;
   a->cols = cols;
   a->ld = rows;
@@ -119,12 +119,12 @@ new_tridiag(int rows){
   assert(rows >= 1);
   a = calloc(1, sizeof(tridiag));
   a->rows = rows;
-  a->d = calloc(rows, sizeof(double));
+  a->d = calloc((size_t) rows, sizeof(double));
   a->l = NULL;
   a->u = NULL;
   if(rows > 1) {
-    a->l = calloc((rows-1), sizeof(double));
-    a->u = calloc((rows-1), sizeof(double));
+    a->l = calloc((size_t) (rows - 1), sizeof(double));
+    a->u = calloc((size_t) (rows - 1), sizeof(double));
   }
 
   return a;

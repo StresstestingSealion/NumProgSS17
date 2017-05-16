@@ -3,4 +3,4 @@ add_executable(P4 p4_inverseiteration.c
         matrix.c matrix.h
         basic.c basic.h)
 
-target_link_libraries(P4 m)
+target_link_libraries(P4 m winmm)
