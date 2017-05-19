@@ -147,7 +147,6 @@ inverse_iteration(ptridiag a, pvector x, int steps, double *eigenvalue, double *
     del_vector(y);
     del_vector(x0);
 
-
 }
 
  /* Note:
@@ -162,60 +161,63 @@ inverse_iteration_withshift(ptridiag a, pvector x, double shift, int steps, doub
      int n = a->rows;
      double *xx = x->x;
 
+     ptridiag lr = clone_ptridiag(a);
+     tridiag_lrdecomp(lr);
+
      // save original vector
-     pvector x0 = new_zero_vector(n);
-     for (i = 0; i < n; i++) {
-         x0->x[i] = xx[i];
-     }
+    //  pvector x0 = new_zero_vector(n);
+    //  for (i = 0; i < n; i++) {
+    //      x0->x[i] = xx[i];
+    //  }
 
      pvector y = new_zero_vector(n);
      double *yx = y->x;
 
      // save  A - shift * ID and decomp
      ptridiag B = new_tridiag(n);
-     for(i = 0; i < n-1; i++) {
-         B->d[i] = a->d[i] - shift;
-         B->u[i] = a->u[i];
-         B->l[i] = a->l[i];
+     for(i = 0; i < n; i++) {
+       lr->d[i] -= shift;
      }
      B->d[n-1] = a->d[n-1] - shift;
      tridiag_lrdecomp(B);
 
      // calculate y = Ax
-     yx[0] = (a->d[0] * xx[0] + a->u[0] * xx[1]);
-     for (i = 1; i < n-1; i++) {
-         yx[i] = a->l[i-1] * xx[i-1] + a->d[i] * xx[i] + a->u[i] * xx[i+1];
-     }
-     yx[n-1] = a->d[n-1] * xx[n-1] + a->l[n-2] * xx[n-2];
+clear_vector(y);
+mvm_tridiag(0,1,a,x,y);
+
 
      // calculate lambda
-     lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+     *eigenvalue = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+
 
      for (i = 0; i < steps; i++) {
+       tridiag_lrsolve(lr, x);
 
          norm = nrm2(n, x->x, 1);
-         tridiag_lrsolve(B, x);
-         scal(n, 1 / norm, x->x, 1);
+      // tridiag_lrsolve(B, x);
+         scal(n, 1 / norm, xx, 1);
 
          // calculate y = Ax
-         yx[0] = (a->d[0] * xx[0] + a->u[0] * xx[1]);
-         for (i = 1; i < n-1; i++) {
-             yx[i] = a->l[i-1] * xx[i-1] + a->d[i] * xx[i] + a->u[i] * xx[i+1];
-         }
-         yx[n-1] = a->d[n-1] * xx[n-1] + a->l[n-2] * xx[n-2];
+         //mvm_tridiag(0,1 , a, x, y);
+         //deleted (mvm_tridiag)
 
          // calculate lambda
          lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
 
      }
 
-     *eigenvalue = lambda;
-     *res = norm2_diff_vector(x0, x);
+     clear_vector(y);
+     mvm_tridiag(0,1,a,x,y);
+
+     *eigenvalue = dot(n,xx,1,yx,1)/dot(n,xx,1,xx,1);
+     axpy(n, -*eigenvalue, xx, 1, yx, 1);
+     *res=nrm2(n, yx, 1);
+     //*res = norm2_diff_vector(x0, x);
 
      // cleanup
-     del_tridiag(B);
+     del_tridiag(lr);
      del_vector(y);
-     del_vector(x0);
+     //del_vector(x0)
 
 }
 
