@@ -45,13 +45,13 @@ tridiag_lrdecomp(ptridiag a) {
     int n = a->rows;
     int i;
 
-    for (i = 1; i < n-1; i++) {
-        l[i-1] /= d[i-1];
-        d[i] -= l[i-1] * u[i-1];
+    for (i = 1; i < n - 1; i++) {
+        l[i - 1] /= d[i - 1];
+        d[i] -= l[i - 1] * u[i - 1];
     }
 
-    l[n-2] /= d[n-2];
-    d[n-1] -= l[n-2] * u[n-2];
+    l[n - 2] /= d[n - 2];
+    d[n - 1] -= l[n - 2] * u[n - 2];
 
 }
 
@@ -63,17 +63,17 @@ tridiag_lrsolve(const ptridiag a, pvector b) {
     double *u = a->u;
     double *bb = b->x;
     int n = a->rows;
-    int i,j;
+    int i, j;
 
     // lowersolve
     for (i = 1; i < n; i++) {
-        bb[i] -= l[i-1] * bb[i-1];
+        bb[i] -= l[i - 1] * bb[i - 1];
     }
 
     // uppersolve
-    bb[n-1] /= d[n-1];
-    for (j = n-1; j-- > 0; ) {
-        bb[j] = (bb[j] - u[j] * bb[j+1]) / d[j];
+    bb[n - 1] /= d[n - 1];
+    for (j = n - 1; j-- > 0;) {
+        bb[j] = (bb[j] - u[j] * bb[j + 1]) / d[j];
     }
 
 }
@@ -93,207 +93,135 @@ tridiag_lrsolve(const ptridiag a, pvector b) {
    */
 
 static void
-inverse_iteration(ptridiag a, pvector x, int steps, double *eigenvalue, double *res){
+inverse_iteration(ptridiag a, pvector x, int steps, double *eigenvalue, double *res) {
 
-    int i,j;
-    double lambda = 0, norm;
+    int i;
+    double norm;
     int n = a->rows;
     double *xx = x->x;
 
-    // save original vector
-    pvector x0 = new_zero_vector(n);
-    for (i = 0; i < n; i++) {
-        x0->x[i] = xx[i];
-    }
+    ptridiag lr = clone_tridiag(a);
+    tridiag_lrdecomp(lr);
 
     pvector y = new_zero_vector(n);
     double *yx = y->x;
 
-    // calculate y = Ax
-    yx[0] = (a->d[0] * xx[0] + a->u[0] * xx[1]);
-    for (i = 1; i < n-1; i++) {
-        yx[i] = a->l[i-1] * xx[i-1] + a->d[i] * xx[i] + a->u[i] * xx[i+1];
-    }
-    yx[n-1] = a->d[n-1] * xx[n-1] + a->l[n-2] * xx[n-2];
+    for (i = 0; i < steps; i++) {
 
-    // calculate lambda
-    lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+        tridiag_lrsolve(lr, x);
+        norm = nrm2(n, x->x, 1);
+        scal(n, 1 / norm, xx, 1);
+
+    }
+
+    // y = Ax
+    clear_vector(y);
+    mvm_tridiag(0, 1, a, x, y);
+
+    *eigenvalue = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+    axpy(n, -*eigenvalue, xx, 1, yx, 1);
+    *res = nrm2(n, yx, 1);
+
+    // cleanup
+    del_tridiag(lr);
+    del_vector(y);
+
+}
+
+/* Note:
+  'shift' describs the parameter mu, used to compute (A - mu * I).
+  */
+
+static void
+inverse_iteration_withshift(ptridiag a, pvector x, double shift, int steps, double *eigenvalue, double *res) {
+
+    int i;
+    double norm;
+    int n = a->rows;
+    double *xx = x->x;
+
+    ptridiag lr = clone_tridiag(a);
+    for (i = 0; i < n; i++) {
+        lr->d[i] -= shift;
+    }
+    tridiag_lrdecomp(lr);
+
+    pvector y = new_zero_vector(n);
+    double *yx = y->x;
+
 
     for (i = 0; i < steps; i++) {
 
+        tridiag_lrsolve(lr, x);
         norm = nrm2(n, x->x, 1);
-        scal(n, 1 / norm, yx, 1);
-
-        for (j = 0; j < n; j++) {
-            xx[j] = yx[j];
-        }
-
-        // calculate y = Ax
-        yx[0] = (a->d[0] * xx[0] + a->u[0] * xx[1]);
-        for (i = 1; i < n-1; i++) {
-            yx[i] = a->l[i-1] * xx[i-1] + a->d[i] * xx[i] + a->u[i] * xx[i+1];
-        }
-        yx[n-1] = a->d[n-1] * xx[n-1] + a->l[n-2] * xx[n-2];
-
-        // calculate lambda
-        lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+        scal(n, 1 / norm, xx, 1);
 
     }
 
-    *eigenvalue = lambda;
-    *res = norm2_diff_vector(x0, x);
+    // y = Ax
+    clear_vector(y);
+    mvm_tridiag(0, 1, a, x, y);
+
+    *eigenvalue = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+    axpy(n, -*eigenvalue, xx, 1, yx, 1);
+    *res = nrm2(n, yx, 1);
 
     // cleanup
+    del_tridiag(lr);
     del_vector(y);
-    del_vector(x0);
 
 }
 
- /* Note:
-   'shift' describs the parameter mu, used to compute (A - mu * I).
-   */
+/* Note:
+  In this case 'shift' is only the start parameter mu.
+  */
 
 static void
-inverse_iteration_withshift(ptridiag a, pvector x, double shift, int steps, double *eigenvalue, double *res){
+rayleigh_iteration(ptridiag a, pvector x, double shift, int steps, double *eigenvalue, double *res) {
 
-     int i;
-     double lambda, norm;
-     int n = a->rows;
-     double *xx = x->x;
+    int i;
+    double norm, lambda;
+    int n = a->rows;
+    double *xx = x->x;
 
-     ptridiag lr = clone_ptridiag(a);
-     tridiag_lrdecomp(lr);
+    ptridiag lr = clone_tridiag(a);
+    for (i = 0; i < n; i++) {
+        lr->d[i] -= shift;
+    }
+    tridiag_lrdecomp(lr);
 
-     // save original vector
-    //  pvector x0 = new_zero_vector(n);
-    //  for (i = 0; i < n; i++) {
-    //      x0->x[i] = xx[i];
-    //  }
-
-     pvector y = new_zero_vector(n);
-     double *yx = y->x;
-
-     // save  A - shift * ID and decomp
-     ptridiag B = new_tridiag(n);
-     for(i = 0; i < n; i++) {
-       lr->d[i] -= shift;
-     }
-     B->d[n-1] = a->d[n-1] - shift;
-     tridiag_lrdecomp(B);
-
-     // calculate y = Ax
-clear_vector(y);
-mvm_tridiag(0,1,a,x,y);
+    pvector y = new_zero_vector(n);
+    double *yx = y->x;
 
 
-     // calculate lambda
-     *eigenvalue = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+    for (i = 0; i < steps; i++) {
+
+        tridiag_lrsolve(lr, x);
+        norm = nrm2(n, x->x, 1);
+        scal(n, 1 / norm, xx, 1);
+
+        // y = Ax
+        clear_vector(y);
+        mvm_tridiag(0, 1, a, x, y);
 
 
-     for (i = 0; i < steps; i++) {
-       tridiag_lrsolve(lr, x);
+        lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+        copy_tridiag(a, lr);
+        for (i = 0; i < n; i++) {
+            lr->d[i] -= lambda;
+        }
+        tridiag_lrdecomp(lr);
 
-         norm = nrm2(n, x->x, 1);
-      // tridiag_lrsolve(B, x);
-         scal(n, 1 / norm, xx, 1);
+    }
 
-         // calculate y = Ax
-         //mvm_tridiag(0,1 , a, x, y);
-         //deleted (mvm_tridiag)
 
-         // calculate lambda
-         lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+    *eigenvalue = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
+    axpy(n, -*eigenvalue, xx, 1, yx, 1);
+    *res = nrm2(n, yx, 1);
 
-     }
-
-     clear_vector(y);
-     mvm_tridiag(0,1,a,x,y);
-
-     *eigenvalue = dot(n,xx,1,yx,1)/dot(n,xx,1,xx,1);
-     axpy(n, -*eigenvalue, xx, 1, yx, 1);
-     *res=nrm2(n, yx, 1);
-     //*res = norm2_diff_vector(x0, x);
-
-     // cleanup
-     del_tridiag(lr);
-     del_vector(y);
-     //del_vector(x0)
-
-}
-
- /* Note:
-   In this case 'shift' is only the start parameter mu.
-   */
-
-static void
-rayleigh_iteration(ptridiag a, pvector x, double shift, int steps, double *eigenvalue, double *res){
-
-     int i;
-     double lambda = 0, norm;
-     int n = a->rows;
-     double *xx = x->x;
-     double rayleigh;
-
-     // save original vector
-     pvector x0 = new_zero_vector(n);
-     for (i = 0; i < n; i++) {
-         x0->x[i] = xx[i];
-     }
-
-     pvector y = new_zero_vector(n);
-     double *yx = y->x;
-
-     ptridiag B = new_tridiag(n);
-
-     // calculate y = Ax
-     yx[0] = (a->d[0] * xx[0] + a->u[0] * xx[1]);
-     for (i = 1; i < n-1; i++) {
-         yx[i] = a->l[i-1] * xx[i-1] + a->d[i] * xx[i] + a->u[i] * xx[i+1];
-     }
-     yx[n-1] = a->d[n-1] * xx[n-1] + a->l[n-2] * xx[n-2];
-
-     // calculate lambda
-     lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
-
-     for (i = 0; i < steps; i++) {
-
-         if (i == 0) {
-             rayleigh = shift;
-         } else {
-             rayleigh = lambda;
-         }
-
-         // restore A - shift * ID and decomp
-         for(i = 0; i < n; i++) {
-             B->d[i] = a->d[i] - rayleigh;
-         }
-         B->u = a->u;
-         B->l = a->l;
-         tridiag_lrdecomp(B);
-
-         norm = nrm2(n, x->x, 1);
-         tridiag_lrsolve(B, x);
-         scal(n, 1 / norm, x->x, 1);
-
-         // calculate y = Ax
-         yx[0] = (a->d[0] * xx[0] + a->u[0] * xx[1]);
-         for (i = 1; i < n-1; i++) {
-             yx[i] = a->l[i-1] * xx[i-1] + a->d[i] * xx[i] + a->u[i] * xx[i+1];
-         }
-         yx[n-1] = a->d[n-1] * xx[n-1] + a->l[n-2] * xx[n-2];
-
-         // calculate lambda
-         lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
-
-     }
-
-     *eigenvalue = lambda;
-     *res = norm2_diff_vector(x0, x);
-
-     // cleanup
-     del_tridiag(B);
-     del_vector(y);
-     del_vector(x0);
+    // cleanup
+    del_tridiag(lr);
+    del_vector(y);
 
 }
 
@@ -302,70 +230,70 @@ rayleigh_iteration(ptridiag a, pvector x, double shift, int steps, double *eigen
  * ============================================================ */
 
 int
-main(void){
+main(void) {
 
-  tridiag *a;
-  vector *x;
-  double norm, lambda, mu;
-  int n;
-  time_t t;
+    tridiag *a;
+    vector *x;
+    double norm, lambda, mu;
+    int n;
+    time_t t;
 
-  n = 1000;
+    n = 100;
 
-  time(&t);
-  srand((unsigned int) t);
+    time(&t);
+    srand((unsigned int) t);
 
-  a = new_threepointstencil(n);
-  x = new_vector(n);
-  random_vector(x);
+    a = new_threepointstencil(n);
+    x = new_vector(n);
+    random_vector(x);
 
-  /* ------------------------------------------------------------
-   * Inverse iteration
-   * ------------------------------------------------------------ */
+    /* ------------------------------------------------------------
+     * Inverse iteration
+     * ------------------------------------------------------------ */
 
-  printf("Inverse iteration\n");
-  lambda = 0.0;
-  norm = 0.0;
-  inverse_iteration(a, x, 10, &lambda, &norm);
+    printf("Inverse iteration\n");
+    lambda = 0.0;
+    norm = 0.0;
+    inverse_iteration(a, x, 10, &lambda, &norm);
 
-  printf("  Eigenvalue %g\n"
-	 "  Residual norm %e\n",
-	 lambda, norm);
+    printf("  Eigenvalue %g\n"
+                   "  Residual norm %e\n",
+           lambda, norm);
 
- /* ------------------------------------------------------------
-   * Inverse iteration with shift
-   * ------------------------------------------------------------ */
-  random_vector(x);
+    /* ------------------------------------------------------------
+      * Inverse iteration with shift
+      * ------------------------------------------------------------ */
+    random_vector(x);
 
-  printf("Inverse iteration with shift\n");
-  lambda = 0.0;
-  norm = 0.0;
-  mu = 7.0;
-  inverse_iteration_withshift(a, x, mu, 10, &lambda, &norm);
+    printf("Inverse iteration with shift\n");
+    lambda = 0.0;
+    norm = 0.0;
+    mu = 7.0;
+    inverse_iteration_withshift(a, x, mu, 10, &lambda, &norm);
 
-  printf("  Eigenvalue %g\n"
-	 "  Residual norm %e\n",
-	 lambda, norm);
+    printf("  Eigenvalue %g\n"
+                   "  Residual norm %e\n",
+           lambda, norm);
 
-  /* ------------------------------------------------------------
-   * Rayleigh iteration
-   * ------------------------------------------------------------ */
+    /* ------------------------------------------------------------
+     * Rayleigh iteration
+     * ------------------------------------------------------------ */
 
-  printf("Rayleigh iteration\n");
+    printf("Rayleigh iteration\n");
 
-  random_vector(x);
-  lambda = 0.0;
-  norm = 0.0;
-  mu = 7.0;
-  rayleigh_iteration(a, x, mu, 10, &lambda, &norm);
+    random_vector(x);
+    lambda = 0.0;
+    norm = 0.0;
+    mu = 7.0;
+    rayleigh_iteration(a, x, mu, 10, &lambda, &norm);
 
-  printf("  Eigenvalue %g\n"
-	 "  Residual norm %e\n",
-	 lambda, norm);
+    printf("  Eigenvalue %g\n"
+                   "  Residual norm %e\n",
+           lambda, norm);
 
-  del_vector(x);
-  del_tridiag(a);
+    del_vector(x);
+    del_tridiag(a);
 
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

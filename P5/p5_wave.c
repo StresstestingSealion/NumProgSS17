@@ -116,22 +116,22 @@ timer_wave(int val){
 }
   
   
-/* last but not least the main function 
-   don't forget to set 'm' 'c' and the number
-   of points 'n' */   
-int
-main(int argc,char **argv){
-  
-   /* ---------------------------------------------- */ 
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T       O     O     D     D     O     O    */ 
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */ 
-  /* ---------------------------------------------- */ 
+/* last but not least the main function
+  don't forget to set 'm' 'c' and the number
+  of points 'n' */
+  int
+  main(int argc,char **argv){
+
+    /* ---------------------------------------------- */
+    /*                                                */
+    /* T T T T T     O O       D D           O O      */
+    /*     T        O   O      D   D        O   O     */
+    /*     T       O     O     D     D     O     O    */
+    /*     T       O     O     D     D     O     O    */
+    /*     T        O   O      D   D        O   O     */
+    /*     T         O O       D D           O O      */
+    /*                                                */
+    /* ---------------------------------------------- */
   
   return EXIT_SUCCESS;
 }

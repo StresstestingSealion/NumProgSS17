@@ -76,27 +76,27 @@ uppersolve_matrix(int unit, const pmatrix a, pvector b){
   }
   else{
     for(k=n; k-->=0; ) {
-      bb[k] /= R[k+k*ldR];
-      axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
-    }
-  }
+    bb[k] /= R[k+k*ldR];
+    axpy(k, -bb[k], R+k*ldR, 1, bb, 1);
+}
+}
 }
 
 
 static pmatrix
 invert(const pmatrix a){
-  int i;
-  int n= a->rows;
+    int i;
+    int n= a->rows;
 
-  pmatrix inva = new_zero_matrix (n,n);
+    pmatrix inva = new_zero_matrix (n,n);
 
-  for (i =0; i<n; i++){
-    pvector v = matrix_col(inva, i);
-    v->x[i]=1;
-    lowersolve_matrix(n,a,v);
-    uppersolve_matrix(n,a,v);
-  }
-  return inva;
+    for (i =0; i<n; i++){
+        pvector v = matrix_col(inva, i);
+        v->x[i]=1;
+        lowersolve_matrix(n,a,v);
+        uppersolve_matrix(n,a,v);
+    }
+    return inva;
 }
 
 /* ============================================================
@@ -106,10 +106,10 @@ invert(const pmatrix a){
 int
 main(void){
 
-  pmatrix a, inva;
-  pvector b, x, xrev;
-  double err, err_abs, norm_x;
-  int rows;
+    pmatrix a, inva;
+    pvector b, x, xrev;
+    double err, err_abs, norm_x;
+    int rows;
   int i;
 
   rows =2048;
