@@ -179,7 +179,7 @@ inverse_iteration_withshift(ptridiag a, pvector x, double shift, int steps, doub
 static void
 rayleigh_iteration(ptridiag a, pvector x, double shift, int steps, double *eigenvalue, double *res) {
 
-    int i;
+    int i,j;
     double norm, lambda;
     int n = a->rows;
     double *xx = x->x;
@@ -204,11 +204,10 @@ rayleigh_iteration(ptridiag a, pvector x, double shift, int steps, double *eigen
         clear_vector(y);
         mvm_tridiag(0, 1, a, x, y);
 
-
         lambda = dot(n, xx, 1, yx, 1) / dot(n, xx, 1, xx, 1);
         copy_tridiag(a, lr);
-        for (i = 0; i < n; i++) {
-            lr->d[i] -= lambda;
+        for (j = 0; j < n; j++) {
+            lr->d[j] -= lambda;
         }
         tridiag_lrdecomp(lr);
 
