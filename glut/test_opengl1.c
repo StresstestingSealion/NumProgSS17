@@ -35,9 +35,9 @@ reshape(int width, int height) {
     Fenstergroeße waehrend der Anwendung
     vom User geaendert wird*/
     if (width > height) {
-        glScalef((double) height / width, 1.0, 1.0);
+        glScalef((GLfloat) height / width, 1.0, 1.0);
     } else {
-        glScalef(1.0, (double) width / height, 1.0);
+        glScalef(1.0, (GLfloat) width / height, 1.0);
     }
 
 }

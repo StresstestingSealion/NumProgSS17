@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 project(NumProgSS17)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra -g -Werror -O3 -funroll-loops -march=native -mtune=native -std=gnu99 -Wno-unknown-pragmas")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra -g -O3 -funroll-loops -march=native -mtune=native -std=gnu99 -Wno-unknown-pragmas")
 
 add_subdirectory(P1)
 add_subdirectory(P2)
