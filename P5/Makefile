@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -Wall -Werror \
+CFLAGS = -Wall \
 	 -O3 -funroll-loops -march=native -mtune=native \
          -std=c99
 GLUT = -lglut -lGLU -lGL

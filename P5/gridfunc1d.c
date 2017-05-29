@@ -17,7 +17,7 @@
 #endif
 
 /*-------------------------------------------------
-*	 Create and destroy a grid 
+*	 Create and destroy a grid
 *--------------------------------------------------*/
 
 
@@ -109,4 +109,3 @@ right_boundary_gridfunc1d(pgridfunc1d u_h, double t) {
     }
 
 }
-

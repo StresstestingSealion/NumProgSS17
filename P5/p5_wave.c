@@ -104,8 +104,8 @@ display_wave() {
 
 }
 
-/* start new waves, leave and so on.... there are a lot of possibilities 
-   Think about a way to change the start point for a new wave (left or right) 
+/* start new waves, leave and so on.... there are a lot of possibilities
+   Think about a way to change the start point for a new wave (left or right)
    and how to reset the simulation */
 static void
 key_wave(unsigned char key, int x, int y) {
@@ -146,7 +146,7 @@ key_wave(unsigned char key, int x, int y) {
 static void
 timer_wave(int val) {
 
-    int steps = 100000;
+    int steps = 30000;
     delta = 0.05 / steps;
 
     int old = current;
@@ -154,10 +154,10 @@ timer_wave(int val) {
 
     for (int i = 0; i <= steps; i++) {
         step_leapfrog1d_wave(u[old], v[old], u[new], v[new], t, delta, data);
+        t += delta;
     }
 
     current = current % 1;
-    t += delta;
 
     /*sorgt dafuer, dass die display wieder aufgerufen
     wird und damit die Veraenderungen gezeichnet*/
