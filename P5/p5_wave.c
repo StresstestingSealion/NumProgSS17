@@ -23,11 +23,12 @@
 
 /*	Wave equation and grid		*/
 pgridfunc1d u[2], v[2];
+pstopwatch sw;
 unsigned int current = 0;        /* switch between grid functions */
 double data[2];                /* data 'c' and left or right wave */
 double t = 1.25;            /* time used to create a start wave */
 double delta;                /* incremenet */
-unsigned int step;            /* to find a good relation between increment size (therefore accuracy)
+unsigned int step = 10;            /* to find a good relation between increment size (therefore accuracy)
  					   update rate for glut. */
 
 
@@ -173,13 +174,15 @@ timer_wave(int val) {
     /*                                                */
     /* ---------------------------------------------- */
 
+
     int old = current;
     int new = current % 1;
     delta = 1;
 
-    left_boundary_gridfunc1d(u[current], val);
-    right_boundary_gridfunc1d(u[current], val);
-    step_leapfrog1d_wave(u[old], v[old], u[new], v[new], val, delta, data);
+    double time = stop_stopwatch(sw);
+    printf("%f\n", time);
+
+    step_leapfrog1d_wave(u[old], v[old], u[new], v[new], time, delta, data);
 
 
     /*sorgt dafuer, dass die display wieder aufgerufen
@@ -189,7 +192,7 @@ timer_wave(int val) {
     /*Die Finktion ruft sich selbst wieder auf,
     damit die Bewegung erneut durchgefuehrt werden
     kann!!*/
-    glutTimerFunc(10, timer_wave, val + 1);
+    glutTimerFunc(step, timer_wave, val + 1);
 
 }
 
@@ -200,6 +203,7 @@ timer_wave(int val) {
 int
 main(int argc, char **argv) {
 
+    sw = new_stopwatch();
 
     double c = 0.3;
     data[0] = c;
@@ -258,11 +262,15 @@ Freeglut Callback-Funktionen fuer den
     Aufruf, die Callback-Funktion und
     einen variablen Wert fuer komplexere
     Callback-Funktionen*/
-    glutTimerFunc(50, timer_wave, 0);
+    glutTimerFunc(step, timer_wave, 0);
 
 /*****************************************
 			Start von Freeglut
 ******************************************/
+
+
+    start_stopwatch(sw);
+
     /*Startet die Glutanwendung, ab jetzt
     werden die Funktionsaufrufe von Freeglut
     verwaltet!
