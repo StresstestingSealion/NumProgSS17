@@ -86,7 +86,6 @@ void
 left_boundary_gridfunc1d(pgridfunc1d u_h, double t) {
 
     double *ux = u_h->x;
-
     if (t - 0.25 < 0 && 0 < t) {
         ux[0] = sin(M_PI * (-t) * 8.0);
     } else {

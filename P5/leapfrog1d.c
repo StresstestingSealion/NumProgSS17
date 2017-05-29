@@ -44,12 +44,9 @@ step_leapfrog1d_wave(pcgridfunc1d u_old, pcgridfunc1d v_old,
         right_boundary_gridfunc1d(u_new, t);
     }
 
-    printf("%f\n", ux_new[1]);
-
-
     for (int i = 1; i < d - 1; i++) {
         ux_new[i] = ux_old[i] + 2 * delta * vx_old[i];
-        vx_new[i] = vx_old[i] + 2 * delta * c * c / 2 * h * 2 * h *
+        vx_new[i] = vx_old[i] + 2*delta * c*c / (2 *h*2*h) *
                                 (ux_old[i - 1] - 2 * ux_old[i] + ux_old[i + 1]);
     }
 }

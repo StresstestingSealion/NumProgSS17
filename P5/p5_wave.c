@@ -146,18 +146,18 @@ key_wave(unsigned char key, int x, int y) {
 static void
 timer_wave(int val) {
 
-    int steps = 100000;
+    int steps = 20000;
     delta = 0.05 / steps;
 
     int old = current;
     int new = current % 1;
 
     for (int i = 0; i <= steps; i++) {
+        t += delta;
         step_leapfrog1d_wave(u[old], v[old], u[new], v[new], t, delta, data);
     }
 
     current = current % 1;
-    t += delta;
 
     /*sorgt dafuer, dass die display wieder aufgerufen
     wird und damit die Veraenderungen gezeichnet*/
@@ -177,10 +177,10 @@ timer_wave(int val) {
 int
 main(int argc, char **argv) {
 
-    double c = 0.3;
+    double c = 0.2;
     data[0] = c;
 
-    unsigned int n = 1000;
+    unsigned int n = 300;
     pgrid1d grid = new_grid1d(n);
 
     u[0] = new_gridfunc1d(grid);
