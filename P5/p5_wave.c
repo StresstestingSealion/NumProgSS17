@@ -28,7 +28,7 @@ unsigned int current = 0;        /* switch between grid functions */
 double data[2];                /* data 'c' and left or right wave */
 double t = 1.25;            /* time used to create a start wave */
 double delta;                /* incremenet */
-unsigned int step = 10;            /* to find a good relation between increment size (therefore accuracy)
+unsigned int step;            /* to find a good relation between increment size (therefore accuracy)
  					   update rate for glut. */
 
 
@@ -71,16 +71,6 @@ color(double coefficient) {
 static void
 display_wave() {
 
-    /* ---------------------------------------------- */
-    /*                                                */
-    /* T T T T T     O O       D D           O O      */
-    /*     T        O   O      D   D        O   O     */
-    /*     T       O     O     D     D     O     O    */
-    /*     T       O     O     D     D     O     O    */
-    /*     T        O   O      D   D        O   O     */
-    /*     T         O O       D D           O O      */
-    /*                                                */
-    /* ---------------------------------------------- */
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix();
@@ -103,22 +93,14 @@ display_wave() {
     glBegin(GL_LINE_STRIP);
     glColor3d(1.0,0.0,0.0);
     for (int j = 0; j < u[current]->d; j++) {
-        double x = -1 + (2.0 / (u[current]->d-2 + 1.0)) * j;
-        glVertex2d(x, u[current]->x[j]);
-    }
-    glEnd();
-
-    // v
-    glBegin(GL_LINE_STRIP);
-    glColor3d(0.0,1.0,0.0);
-    for (int j = 0; j < u[current]->d; j++) {
-        double x = -1 + (2.0 / (v[current]->d-2 + 1.0)) * j;
-        glVertex2d(x, v[current]->x[j]);
+        double n = u[current]->d-2;
+        double x = -1.0 + 2.0/n * (j+1);
+        double y = u[current]->x[j] * 0.2;
+        glVertex2d(x, y);
     }
     glEnd();
 
     glFlush();
-    glutSwapBuffers();
 
 }
 
@@ -128,21 +110,8 @@ display_wave() {
 static void
 key_wave(unsigned char key, int x, int y) {
 
-    /* ---------------------------------------------- */
-    /*                                                */
-    /* T T T T T     O O       D D           O O      */
-    /*     T        O   O      D   D        O   O     */
-    /*     T       O     O     D     D     O     O    */
-    /*     T       O     O     D     D     O     O    */
-    /*     T        O   O      D   D        O   O     */
-    /*     T         O O       D D           O O      */
-    /*                                                */
-    /* ---------------------------------------------- */
-
     (void) x;
     (void) y;
-
-    printf("%d \n", key);
 
     /*
      * Beschreibung, welche Folgen das
@@ -152,6 +121,20 @@ key_wave(unsigned char key, int x, int y) {
     switch (key) {
         case 27 :
             exit(EXIT_SUCCESS);
+        case 'a' :
+            data[1] = 1.0;
+            t = 0.0;
+            break;
+        case 'd' :
+            data[1] = 0.0;
+            t = 0.0;
+            break;
+        case 'r' :
+            zero_gridfunc1d(u[current]);
+            zero_gridfunc1d(u[1 - current]);
+            zero_gridfunc1d(v[current]);
+            zero_gridfunc1d(v[1 - current]);
+            t = 1.25;
         default :
             break;
     }
@@ -163,27 +146,18 @@ key_wave(unsigned char key, int x, int y) {
 static void
 timer_wave(int val) {
 
-    /* ---------------------------------------------- */
-    /*                                                */
-    /* T T T T T     O O       D D           O O      */
-    /*     T        O   O      D   D        O   O     */
-    /*     T       O     O     D     D     O     O    */
-    /*     T       O     O     D     D     O     O    */
-    /*     T        O   O      D   D        O   O     */
-    /*     T         O O       D D           O O      */
-    /*                                                */
-    /* ---------------------------------------------- */
-
+    int steps = 100000;
+    delta = 0.05 / steps;
 
     int old = current;
     int new = current % 1;
-    delta = 1;
 
-    double time = stop_stopwatch(sw);
-    printf("%f\n", time);
+    for (int i = 0; i <= steps; i++) {
+        step_leapfrog1d_wave(u[old], v[old], u[new], v[new], t, delta, data);
+    }
 
-    step_leapfrog1d_wave(u[old], v[old], u[new], v[new], time, delta, data);
-
+    current = current % 1;
+    t += delta;
 
     /*sorgt dafuer, dass die display wieder aufgerufen
     wird und damit die Veraenderungen gezeichnet*/
@@ -202,8 +176,6 @@ timer_wave(int val) {
   of points 'n' */
 int
 main(int argc, char **argv) {
-
-    sw = new_stopwatch();
 
     double c = 0.3;
     data[0] = c;
@@ -267,9 +239,6 @@ Freeglut Callback-Funktionen fuer den
 /*****************************************
 			Start von Freeglut
 ******************************************/
-
-
-    start_stopwatch(sw);
 
     /*Startet die Glutanwendung, ab jetzt
     werden die Funktionsaufrufe von Freeglut

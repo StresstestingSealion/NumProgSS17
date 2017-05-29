@@ -23,40 +23,33 @@
 
 void
 step_leapfrog1d_wave(pcgridfunc1d u_old, pcgridfunc1d v_old,
-    pgridfunc1d u_new, pgridfunc1d v_new,
-    double t, double delta, void *data) {
+                     pgridfunc1d u_new, pgridfunc1d v_new,
+                     double t, double delta, void *data) {
+
+    double *ux_new = u_new->x;
+    double *ux_old = u_old->x;
+
+    double *vx_new = v_new->x;
+    double *vx_old = v_old->x;
+
+    double c = ((double *) data)[0];
+    double left = ((double *) data)[1];
+    double h = u_old->g->h;
+    double d = u_old->d;
 
 
-        int d = u_old->d;
-
-        double *ux_new = u_new->x;
-        double *ux_old = u_old->x;
-
-        double *vx_new = v_new->x;
-        double *vx_old = v_old->x;
-
-
-        // ux_new = ux_old + 2*delta * vx_old,
-        // vx_new = vx_old - 2*delta * A * ux_new;
-
-        double Ax[d];
-        double alpha;
-
+    if (left) {
         left_boundary_gridfunc1d(u_new, t);
+    } else {
         right_boundary_gridfunc1d(u_new, t);
+    }
 
-        for (int i = 1; i < d-1; i++) {
-            ux_new[i] = ux_old[i] + 2*delta*vx_old[i];
-            vx_new[i] = vx_old[i] - 2*delta* Ax[i];
-        }
+    printf("%f\n", ux_new[1]);
 
 
-        /*
-        for (int i = 0; i < d; i++) {
-            if (ux_old[i] > 1) ux_new[i] = -1;
-            else ux_new[i] = ux_old[i] + 0.005;
-            vx_new[i] = vx_old[i] - 2*delta* Ax[i];
-        }
-         */
-
+    for (int i = 1; i < d - 1; i++) {
+        ux_new[i] = ux_old[i] + 2 * delta * vx_old[i];
+        vx_new[i] = vx_old[i] + 2 * delta * c * c / 2 * h * 2 * h *
+                                (ux_old[i - 1] - 2 * ux_old[i] + ux_old[i + 1]);
+    }
 }
