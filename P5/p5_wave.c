@@ -57,13 +57,6 @@ reshape_wave(int width, int height) {
 }
 
 
-/* maybe you want to use different colors ? ;-) */
-static void
-color(double coefficient) {
-
-}
-
-
 /* and now... the content =)
    draw the string and the deflections, maybe with some nice colors
    and think about scaling !*/
@@ -92,7 +85,7 @@ display_wave() {
     // u
     glBegin(GL_LINE_STRIP);
     glColor3d(1.0,0.0,0.0);
-    for (int j = 0; j < u[current]->d; j++) {
+    for (unsigned int j = 0; j < u[current]->d; j++) {
         double n = u[current]->d-2;
         double x = -1.0 + 2.0/n * (j+1);
         double y = u[current]->x[j] * 0.2;
