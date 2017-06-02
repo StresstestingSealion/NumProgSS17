@@ -94,7 +94,7 @@ display_wave() {
     glColor3d(1.0,0.0,0.0);
     for (int j = 0; j < u[current]->d; j++) {
         double n = u[current]->d-2;
-        double x = -1.0 + 2.0/(n+1)*j;
+        double x = -1.0 + 2.0/n * (j+1);
         double y = u[current]->x[j] * 0.2;
         glVertex2d(x, y);
     }
@@ -146,15 +146,15 @@ key_wave(unsigned char key, int x, int y) {
 static void
 timer_wave(int val) {
 
-    int steps = 100;
-    delta = 0.01 / steps;
+    int steps = 20000;
+    delta = 0.05 / steps;
 
     int old = current;
     int new = current % 1;
 
     for (int i = 0; i <= steps; i++) {
-        step_leapfrog1d_wave(u[old], v[old], u[new], v[new], t, delta, data);
         t += delta;
+        step_leapfrog1d_wave(u[old], v[old], u[new], v[new], t, delta, data);
     }
 
     current = current % 1;
@@ -166,7 +166,7 @@ timer_wave(int val) {
     /*Die Finktion ruft sich selbst wieder auf,
     damit die Bewegung erneut durchgefuehrt werden
     kann!!*/
-    glutTimerFunc(50, timer_wave, val + 1);
+    glutTimerFunc(step, timer_wave, val + 1);
 
 }
 
@@ -177,7 +177,7 @@ timer_wave(int val) {
 int
 main(int argc, char **argv) {
 
-    double c = 1.0;
+    double c = 0.2;
     data[0] = c;
 
     unsigned int n = 300;
@@ -234,7 +234,7 @@ Freeglut Callback-Funktionen fuer den
     Aufruf, die Callback-Funktion und
     einen variablen Wert fuer komplexere
     Callback-Funktionen*/
-    glutTimerFunc(50, timer_wave, 0);
+    glutTimerFunc(step, timer_wave, 0);
 
 /*****************************************
 			Start von Freeglut

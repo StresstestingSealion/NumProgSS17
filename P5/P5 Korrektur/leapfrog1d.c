@@ -35,23 +35,18 @@ step_leapfrog1d_wave(pcgridfunc1d u_old, pcgridfunc1d v_old,
     double c = ((double *) data)[0];
     double left = ((double *) data)[1];
     double h = u_old->g->h;
-    int d = u_old->d;
+    double d = u_old->d;
 
-	for (int i = 1; i<d)
-		ux_new[i] = ux_old[i]+2*delta*vx_old[i];
 
     if (left) {
         left_boundary_gridfunc1d(u_new, t);
-	ux_new[d-1] = 0.0;
     } else {
         right_boundary_gridfunc1d(u_new, t);
-	ux_new[0]=0.0;
     }
 
     for (int i = 1; i < d - 1; i++) {
         ux_new[i] = ux_old[i] + 2 * delta * vx_old[i];
-        vx_new[i] = vx_old[i] + 2*delta * c*c / (h*h) *
-                                (ux_new[i - 1] - 2 * ux_new[i] + ux_new[i + 1]);
-				//calculate ux_new[i+1] in additional loop
+        vx_new[i] = vx_old[i] + 2*delta * c*c / (2 *h*2*h) *
+                                (ux_old[i - 1] - 2 * ux_old[i] + ux_old[i + 1]);
     }
 }
