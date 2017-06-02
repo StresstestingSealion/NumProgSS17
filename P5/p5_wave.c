@@ -7,10 +7,9 @@
 /*---------------------------------------------------------------*/
 
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <GL/freeglut.h>
-#include <GL/glut.h>
+#include <stdio.h>
 
 #include "gridfunc1d.h"
 #include "leapfrog1d.h"
@@ -28,7 +27,7 @@ unsigned int current = 0;        /* switch between grid functions */
 double data[2];                /* data 'c' and left or right wave */
 double t = 1.25;            /* time used to create a start wave */
 double delta;                /* incremenet */
-unsigned int step;            /* to find a good relation between increment size (therefore accuracy)
+unsigned int step = 10;            /* to find a good relation between increment size (therefore accuracy)
  					   update rate for glut. */
 
 
@@ -57,13 +56,6 @@ reshape_wave(int width, int height) {
 }
 
 
-/* maybe you want to use different colors ? ;-) */
-static void
-color(double coefficient) {
-
-}
-
-
 /* and now... the content =)
    draw the string and the deflections, maybe with some nice colors
    and think about scaling !*/
@@ -79,10 +71,10 @@ display_wave() {
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
     // Koordinaten-System
-    glColor3d(0.0,0.0,0.0);
+    glColor3d(0.0, 0.0, 0.0);
     glBegin(GL_LINES);
-    glVertex2f(-1.0,0.0);
-    glVertex2f(1.0,0.0);
+    glVertex2f(-1.0, 0.0);
+    glVertex2f(1.0, 0.0);
     glEnd();
     glBegin(GL_LINES);
     glVertex2f(0.0, 1.0);
@@ -104,8 +96,38 @@ display_wave() {
 
 }
 
-/* start new waves, leave and so on.... there are a lot of possibilities 
-   Think about a way to change the start point for a new wave (left or right) 
+
+/* it's necessary to compute new values and redisplay them after a while....*/
+static void
+timer_wave(int val) {
+
+    int steps = 20000;
+    delta = 0.05 / steps;
+
+    int old = current;
+    int new = current % 1;
+
+    for (int i = 0; i <= steps; i++) {
+        t += delta;
+        step_leapfrog1d_wave(u[old], v[old], u[new], v[new], t, delta, data);
+    }
+
+    current = current % 1;
+
+    /*sorgt dafuer, dass die display wieder aufgerufen
+    wird und damit die Veraenderungen gezeichnet*/
+    glutPostRedisplay();
+
+    /*Die Finktion ruft sich selbst wieder auf,
+    damit die Bewegung erneut durchgefuehrt werden
+    kann!!*/
+    glutTimerFunc(step, timer_wave, val + 1);
+
+}
+
+
+/* start new waves, leave and so on.... there are a lot of possibilities
+   Think about a way to change the start point for a new wave (left or right)
    and how to reset the simulation */
 static void
 key_wave(unsigned char key, int x, int y) {
@@ -135,6 +157,16 @@ key_wave(unsigned char key, int x, int y) {
             zero_gridfunc1d(v[current]);
             zero_gridfunc1d(v[1 - current]);
             t = 1.25;
+            break;
+        case '+' :
+            step += 1;
+            printf("new step: %u\n", step);
+            break;
+        case '-' :
+            step -= 1;
+            if ((signed) step <= 0) step = 1;
+            printf("new step: %u\n", step);
+            break;
         default :
             break;
     }
