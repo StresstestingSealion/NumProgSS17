@@ -34,9 +34,9 @@ step_leapfrog1d_wave(pcgridfunc1d u_old, pcgridfunc1d v_old,
     double h = u_old->g->h;
     int d = u_old->d;
 
-	for (int i = 1; i<d)
+	for (int i = 1; i<d;){
 		ux_new[i] = ux_old[i]+2*delta*vx_old[i];
-
+		}
     if (left) {
         left_boundary_gridfunc1d(u_new, t);
 	ux_new[d-1] = 0.0;

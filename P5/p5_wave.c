@@ -101,7 +101,7 @@ display_wave() {
 static void
 timer_wave(int val) {
 
-    int steps = 20000;
+    int steps = 10000;
     delta = 0.05 / steps;
 
     int old = current;
@@ -170,35 +170,6 @@ key_wave(unsigned char key, int x, int y) {
         default :
             break;
     }
-
-}
-
-
-/* it's necessary to compute new values and redisplay them after a while....*/
-static void
-timer_wave(int val) {
-
-    int steps = 100;
-    delta = 0.01 / steps;
-
-    int old = current;
-    int new = current % 1;
-
-    for (int i = 0; i <= steps; i++) {
-        step_leapfrog1d_wave(u[old], v[old], u[new], v[new], t, delta, data);
-        t += delta;
-    }
-
-    current = current % 1;
-
-    /*sorgt dafuer, dass die display wieder aufgerufen
-    wird und damit die Veraenderungen gezeichnet*/
-    glutPostRedisplay();
-
-    /*Die Finktion ruft sich selbst wieder auf,
-    damit die Bewegung erneut durchgefuehrt werden
-    kann!!*/
-    glutTimerFunc(50, timer_wave, val + 1);
 
 }
 
