@@ -225,7 +225,7 @@ read_surface3d(const char *filename)
   ln = 0;
   line = readline(buf, 80, in, &ln);
 
-  if (line == 0 || sscanf(line, "%u %u %u", &vertices, &edges, &triangles)
+  if (line == 0 || sscanf(line, "%d %d %d", &vertices, &edges, &triangles)
       != 3) {
     (void) fprintf(stderr, "Could not read first line of file \"%s\"\n",
 		   filename);
@@ -261,7 +261,7 @@ read_surface3d(const char *filename)
   for (i = 0; i < edges; i++) {
     line = readline(buf, 80, in, &ln);
 
-    if (line == 0 || sscanf(line, "%u %u", e[i], e[i] + 1) != 2) {
+    if (line == 0 || sscanf(line, "%d %d", e[i], e[i] + 1) != 2) {
       (void) fprintf(stderr,
 		     "Could not read edge %u in line %u of file \"%s\"\n", i,
 		     ln, filename);
@@ -276,7 +276,7 @@ read_surface3d(const char *filename)
   for (i = 0; i < triangles; i++) {
     line = readline(buf, 80, in, &ln);
 
-    if (line == 0 || sscanf(line, "%u %u %u  %u %u %u", t[i], t[i] + 1,
+    if (line == 0 || sscanf(line, "%d %d %d  %d %d %d", t[i], t[i] + 1,
 			    t[i] + 2, s[i], s[i] + 1, s[i] + 2)
 	!= 6) {
       (void) fprintf(stderr,

@@ -26,7 +26,6 @@ float angle = 0.0;
 static void
 reshape(int width, int height) {
     GLfloat p[4], a[4], d[4];
-
     glViewport(0, 0, width, height);
 
     glMatrixMode(GL_PROJECTION);
@@ -116,7 +115,7 @@ display() {
     glPushMatrix();
 
     /* Hintergrundfarbe */
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(1.0, 0.0, 0.0, 1.0);
 
     /*Umsetzten der Bewegungen aus der Motion*/
     glRotatef(angle_x, 1.0, 0.0, 0.0);

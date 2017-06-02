@@ -6,9 +6,6 @@
 /*	Versionsnummer:	1					 */
 /*---------------------------------------------------------------*/
 
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "gridfunc1d.h"
 #include "leapfrog1d.h"
 
