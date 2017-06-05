@@ -25,7 +25,6 @@
 * Global variable
 *-------------------------------------------------------------*/
 
-
 psurface3d gr;
 static int old_position_x, old_position_y;
 static float angle_x = 0.0;
@@ -35,43 +34,11 @@ static float old_angle_x, old_angle_y;
 float angle = 0.0;
 float zoomFactor = 1.0; /* Global, if you want. Modified by user input. Initially 1.0 */
 
+int grid_only = 0;
+
 /* Translation */
 static void
 translate(double x, double y, double z) {
-
-    /* ---------------------------------------------- */
-    /*                                                */
-    /* T T T T T     O O       D D           O O      */
-    /*     T        O   O      D   D        O   O     */
-    /*     T       O     O     D     D     O     O    */
-    /*     T       O     O     D     D     O     O    */
-    /*     T        O   O      D   D        O   O     */
-    /*     T         O O       D D           O O      */
-    /*                                                */
-    /* ---------------------------------------------- */
-
-}
-
-/* Rotation around x-axis */
-static void
-rotate_x(double alpha) {
-
-    /* ---------------------------------------------- */
-    /*                                                */
-    /* T T T T T     O O       D D           O O      */
-    /*     T        O   O      D   D        O   O     */
-    /*     T       O     O     D     D     O     O    */
-    /*     T       O     O     D     D     O     O    */
-    /*     T        O   O      D   D        O   O     */
-    /*     T         O O       D D           O O      */
-    /*                                                */
-    /* ---------------------------------------------- */
-
-}
-
-/* Rotation around y-axis */
-static void
-rotate_y(double alpha) {
 
     /* ---------------------------------------------- */
     /*                                                */
@@ -110,16 +77,43 @@ display_mesh() {
     glRotatef(angle_x, 1.0, 0.0, 0.0);
     glRotatef(angle_y, 0.0, 1.0, 0.0);
 
-    glBegin(GL_TRIANGLES);
-    glColor3d(0.0, 0.0, 0.0);
-    int vertices = gr->vertices;
     real (*x)[3] = gr->x;
-    for (int i = 0; i < vertices; i++) {
-        glVertex3f(x[i][0], x[i][1], x[i][2]);
-    }
-    glEnd();
 
-    glPopMatrix();
+    if (!grid_only) {
+
+        int triangles = gr->triangles;
+        int (*t)[3] = gr->t;
+        real (*n)[3] = gr->n;
+        int start, mid, end;
+        glColor3d(1.0, 0.0, 0.0);
+        glBegin(GL_TRIANGLES);
+        for (int i = 0; i < triangles; i++) {
+            start = t[i][0];
+            mid = t[i][1];
+            end = t[i][2];
+            glNormal3f(n[i][0], n[i][1], n[i][2]);
+            glVertex3f(x[start][0], x[start][1], x[start][2]);
+            glVertex3f(x[mid][0], x[mid][1], x[mid][2]);
+            glVertex3f(x[end][0], x[end][1], x[end][2]);
+        }
+        glEnd();
+
+    } else {
+
+        int edges = gr->edges;
+        int (*e)[2] = gr->e;
+        int start, end;
+        glColor3d(0.0, 1.0, 0.0);
+        glBegin(GL_LINES);
+        for (int i = 0; i < edges; i++) {
+            start = e[i][0];
+            end = e[i][1];
+            glVertex3f(x[start][0], x[start][1], x[start][2]);
+            glVertex3f(x[end][0], x[end][1], x[end][2]);
+        }
+        glEnd();
+
+    }
 
     /*nun Beleuchtung und Modelleigenschaften*/
     glMatrixMode(GL_MODELVIEW);
@@ -199,11 +193,8 @@ reshape_mesh(int width, int height) {
     3.Entfernung Betrachter zur nahen Z-Flaeche
     4.Entfernung Betrachter zur fernen Z-Flaeche
     */
-    gluPerspective(35.0, 1.0, 1.0, 30.0);
+    gluPerspective(35.0, 1.0, 1.0, 300.0);
 
-    /*Verschieben des Standpunkts zur besseren
-    Betrachtung*/
-    glTranslatef(0.0, 0.0, -10.0);
 
 }
 
@@ -238,18 +229,6 @@ mouse_mesh(int button, int state, int position_y, int position_x) {
 static void
 motion_mesh(int position_y, int position_x) {
 
-    /* ---------------------------------------------- */
-    /*                                                */
-    /* T T T T T     O O       D D           O O      */
-    /*     T        O   O      D   D        O   O     */
-    /*     T       O     O     D     D     O     O    */
-    /*     T       O     O     D     D     O     O    */
-    /*     T        O   O      D   D        O   O     */
-    /*     T         O O       D D           O O      */
-    /*                                                */
-    /* ---------------------------------------------- */
-
-
     /*Bestimmung des noetigen Winkels zur Umsetzung
     der, mit der Mouse durchgefuehrten, Bewegung*/
     angle_x = old_angle_x + (position_x - old_position_x);
@@ -265,17 +244,6 @@ motion_mesh(int position_y, int position_x) {
 static void
 key_mesh(unsigned char key, int x, int y) {
 
-    /* ---------------------------------------------- */
-    /*                                                */
-    /* T T T T T     O O       D D           O O      */
-    /*     T        O   O      D   D        O   O     */
-    /*     T       O     O     D     D     O     O    */
-    /*     T       O     O     D     D     O     O    */
-    /*     T        O   O      D   D        O   O     */
-    /*     T         O O       D D           O O      */
-    /*                                                */
-    /* ---------------------------------------------- */
-
     (void) x;
     (void) y;
 
@@ -287,10 +255,19 @@ key_mesh(unsigned char key, int x, int y) {
     switch (key) {
         case 27 :
             exit(EXIT_SUCCESS);
+        case 'g':
+            grid_only = 1 - grid_only;
+            break;
+        case 'z':
+            zoomFactor += 0.05;
+            break;
+        case 'h':
+            zoomFactor -= 0.05;
             break;
         default :
             break;
     }
+    glutPostRedisplay();
 
 }
 
@@ -299,9 +276,6 @@ key_mesh(unsigned char key, int x, int y) {
 int
 main(int argc, char **argv) {
 
-
-    psurface3d sur;
-    int i;
 
     /* Reading mesh */
     if (argc > 1) {
