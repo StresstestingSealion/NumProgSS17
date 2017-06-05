@@ -22,13 +22,11 @@
 
 /*	Wave equation and grid		*/
 pgridfunc1d u[2], v[2];
-pstopwatch sw;
 unsigned int current = 0;        /* switch between grid functions */
 double data[2];                /* data 'c' and left or right wave */
 double t = 1.25;            /* time used to create a start wave */
-double delta;                /* incremenet */
-unsigned int step = 10;            /* to find a good relation between increment size (therefore accuracy)
- 					   update rate for glut. */
+double delta = 0.00001;                /* incremenet */
+unsigned int step = 10;            /* update rate for glut. */
 
 
 /* reshape function (simple 2D without frills!) */
@@ -81,17 +79,15 @@ display_wave() {
     glVertex2f(0.0, -1.0);
     glEnd();
 
-    // u
     glBegin(GL_LINE_STRIP);
     glColor3d(1.0, 0.0, 0.0);
     for (unsigned int j = 0; j < u[current]->d; j++) {
         double n = u[current]->d - 2;
-        double x = -1.0 + 2.0 / n * (j + 1);
+        double x = -1.0 + 2.0 / n * j;
         double y = u[current]->x[j] * 0.2;
         glVertex2d(x, y);
     }
     glEnd();
-
     glFlush();
 
 }
@@ -101,18 +97,12 @@ display_wave() {
 static void
 timer_wave(int val) {
 
-    int steps = 20000;
-    delta = 0.05 / steps;
 
-    int old = current;
-    int new = current % 1;
-
-    for (int i = 0; i <= steps; i++) {
+    for (int i = 0; i <= 100; i++) {
+        step_leapfrog1d_wave(u[current], v[current], u[1-current], v[1-current], t, delta, data);
         t += delta;
-        step_leapfrog1d_wave(u[old], v[old], u[new], v[new], t, delta, data);
+        current = 1 - current;
     }
-
-    current = current % 1;
 
     /*sorgt dafuer, dass die display wieder aufgerufen
     wird und damit die Veraenderungen gezeichnet*/
@@ -121,7 +111,7 @@ timer_wave(int val) {
     /*Die Finktion ruft sich selbst wieder auf,
     damit die Bewegung erneut durchgefuehrt werden
     kann!!*/
-    glutTimerFunc(step, timer_wave, val + 1);
+    glutTimerFunc(step, timer_wave, val);
 
 }
 
@@ -180,10 +170,10 @@ key_wave(unsigned char key, int x, int y) {
 int
 main(int argc, char **argv) {
 
-    double c = 0.2;
+    double c = 1.0;
     data[0] = c;
 
-    unsigned int n = 300;
+    unsigned int n = 500;
     pgrid1d grid = new_grid1d(n);
 
     u[0] = new_gridfunc1d(grid);
