@@ -30,6 +30,9 @@ static int old_position_x, old_position_y;
 static float angle_x = 0.0;
 static float angle_y = 0.0;
 static float old_angle_x, old_angle_y;
+static float trans_x = 0.0;
+static float trans_y = 0.0;
+static float trans_z = 0.0;
 
 float angle = 0.0;
 float zoomFactor = 1.0; /* Global, if you want. Modified by user input. Initially 1.0 */
@@ -40,17 +43,43 @@ int grid_only = 0;
 static void
 translate(double x, double y, double z) {
 
-    /* ---------------------------------------------- */
-    /*                                                */
-    /* T T T T T     O O       D D           O O      */
-    /*     T        O   O      D   D        O   O     */
-    /*     T       O     O     D     D     O     O    */
-    /*     T       O     O     D     D     O     O    */
-    /*     T        O   O      D   D        O   O     */
-    /*     T         O O       D D           O O      */
-    /*                                                */
-    /* ---------------------------------------------- */
+    GLfloat T[16];
 
+    T[0] = 1.0;  T[4] = 0.0;  T[8] = 0.0;  T[12] = x;
+    T[1] = 0.0;  T[5] = 1.0;  T[9] = 0.0;  T[13] = y;
+    T[2] = 0.0;  T[6] = 0.0;  T[10] = 1.0;  T[14] = z;
+    T[3] = 0.0;  T[7] = 0.0;  T[11] = 0.0;  T[15] = 1.0;
+
+    glMultMatrixf(T);
+
+}
+
+static void
+rotate_x(double a) {
+
+    GLfloat R[16];
+
+    R[0] = 1.0;  R[4] = 0.0;  R[8] = 0.0;  R[12] = 0.0;
+    R[1] = 0.0;  R[5] = cos(a);  R[9] = -sin(a);  R[13] = 0.0;
+    R[2] = 0.0;  R[6] = sin(a);  R[10] = cos(a);  R[14] = 0.0;
+    R[3] = 0.0;  R[7] = 0.0;  R[11] = 0.0;  R[15] = 1.0;
+
+    glMultMatrixf(R);
+
+}
+
+
+static void
+rotate_y(double a) {
+
+    GLfloat R[16];
+
+    R[0] = cos(a);  R[4] = 0.0;  R[8] = sin(a);  R[12] = 0.0;
+    R[1] = 0.0;  R[5] = 1.0;  R[9] = 0.0;  R[13] = 0.0;
+    R[2] = -sin(a);  R[6] = 0.0;  R[10] = cos(a);  R[14] = 0.0;
+    R[3] = 0.0;  R[7] = 0.0;  R[11] = 0.0;  R[15] = 1.0;
+
+    glMultMatrixf(R);
 }
 
 
@@ -60,22 +89,29 @@ display_mesh() {
 
     int width = glutGet(GLUT_WINDOW_WIDTH);
     int height = glutGet(GLUT_WINDOW_HEIGHT);
-
     GLfloat p[4], a[4], d[4];
+
+    // set Viewport
     glViewport(0, 0, width, height);
 
+    // clear buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // set camera position (zoom)
     gluLookAt(0, 0, zoomFactor, 0, 0, -1, 0, 1, 0);
+
+    /* Hintergrundfarbe */
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+
 
     glPushMatrix();
 
-    /* Hintergrundfarbe */
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    // rotate
+    rotate_x(angle_x);
+    rotate_y(angle_y);
 
-    /*Umsetzten der Bewegungen aus der Motion*/
-    glRotatef(angle_x, 1.0, 0.0, 0.0);
-    glRotatef(angle_y, 0.0, 1.0, 0.0);
+    // translate
+    translate(trans_x, trans_y, trans_z);
 
     real (*x)[3] = gr->x;
 
@@ -114,6 +150,9 @@ display_mesh() {
         glEnd();
 
     }
+
+    glPopMatrix();
+
 
     /*nun Beleuchtung und Modelleigenschaften*/
     glMatrixMode(GL_MODELVIEW);
@@ -207,8 +246,6 @@ mouse_mesh(int button, int state, int position_y, int position_x) {
 
     if (button == 3) zoomFactor += 0.25;
     if (button == 4) zoomFactor -= 0.25;
-    printf("%f\n", zoomFactor);
-
 
     /*Ersetzten der alten Positionen durch die neu
     ermittelten*/
@@ -231,8 +268,8 @@ motion_mesh(int position_y, int position_x) {
 
     /*Bestimmung des noetigen Winkels zur Umsetzung
     der, mit der Mouse durchgefuehrten, Bewegung*/
-    angle_x = old_angle_x + (position_x - old_position_x);
-    angle_y = old_angle_y + (position_y - old_position_y);
+    angle_x = 0.01 * (old_angle_x + (position_x - old_position_x));
+    angle_y = 0.01 * (old_angle_y + (position_y - old_position_y));
 
     /*sorgt dafuer, dass die display wieder aufgerufen
     wird und damit die Veraenderungen gezeichnet*/
@@ -264,10 +301,37 @@ key_mesh(unsigned char key, int x, int y) {
         case 'h':
             zoomFactor -= 0.05;
             break;
+        case 'a':
+            trans_x += 0.5;
+            break;
+        case 'd':
+            trans_x -= 0.5;
+            break;
+        case 'w':
+            trans_y += 0.5;
+            break;
+        case 's':
+            trans_y -= 0.5;
+            break;
+        case 'r':
+            zoomFactor = 0.0;
+            angle_x = 0.0;
+            angle_y = 0.0;
+            trans_x = 0.0;
+            trans_y = 0.0;
+            trans_z = 0.0;
+            break;
         default :
             break;
     }
     glutPostRedisplay();
+
+}
+
+void normalize() {
+
+
+
 
 }
 
@@ -293,17 +357,8 @@ main(int argc, char **argv) {
 
     glutReshapeFunc(reshape_mesh);
     glutDisplayFunc(display_mesh);
-
-    /*Zur Ermitterlung der Bewegungen
-    der Mouse ueber dem GlutFenster*/
     glutMouseFunc(mouse_mesh);
-
-    /*Zum Umsetzten der Bewegung der
-    Maus in eine Bewegung im Bild*/
     glutMotionFunc(motion_mesh);
-
-    /*Zur Umsetzung von vorher festgelegten
-    Befehlen ueber die Tastatur*/
     glutKeyboardFunc(key_mesh);
 
     glutMainLoop();
