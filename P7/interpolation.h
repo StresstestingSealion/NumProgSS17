@@ -43,7 +43,7 @@ del_interpolation(pinterpolation inter);
 void
 setup_chebyshev_interpolationpoints(pinterpolation inter, double a, double b);
 
-/* Set up aequidistant interpolation points on [a,b] */
+/* Set up equidistant interpolation points on [a,b] */
 
 void 
 setup_aequidistant_interpolationpoints(pinterpolation inter, double a, double b);

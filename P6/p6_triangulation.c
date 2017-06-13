@@ -35,7 +35,7 @@ static float trans_y = 0.0;
 static float trans_z = 0.0;
 
 float angle = 0.0;
-float zoomFactor = 1.0; /* Global, if you want. Modified by user input. Initially 1.0 */
+double zoomFactor = 1.0;
 
 int grid_only = 0;
 
@@ -43,28 +43,28 @@ int grid_only = 0;
 static void
 translate(double x, double y, double z) {
 
-    GLfloat T[16];
+    GLdouble T[16];
 
     T[0] = 1.0;  T[4] = 0.0;  T[8] = 0.0;  T[12] = x;
     T[1] = 0.0;  T[5] = 1.0;  T[9] = 0.0;  T[13] = y;
     T[2] = 0.0;  T[6] = 0.0;  T[10] = 1.0;  T[14] = z;
     T[3] = 0.0;  T[7] = 0.0;  T[11] = 0.0;  T[15] = 1.0;
 
-    glMultMatrixf(T);
+    glMultMatrixd(T);
 
 }
 
 static void
 rotate_x(double a) {
 
-    GLfloat R[16];
+    GLdouble R[16];
 
     R[0] = 1.0;  R[4] = 0.0;  R[8] = 0.0;  R[12] = 0.0;
     R[1] = 0.0;  R[5] = cos(a);  R[9] = -sin(a);  R[13] = 0.0;
     R[2] = 0.0;  R[6] = sin(a);  R[10] = cos(a);  R[14] = 0.0;
     R[3] = 0.0;  R[7] = 0.0;  R[11] = 0.0;  R[15] = 1.0;
 
-    glMultMatrixf(R);
+    glMultMatrixd(R);
 
 }
 
@@ -72,14 +72,14 @@ rotate_x(double a) {
 static void
 rotate_y(double a) {
 
-    GLfloat R[16];
+    GLdouble R[16];
 
     R[0] = cos(a);  R[4] = 0.0;  R[8] = sin(a);  R[12] = 0.0;
     R[1] = 0.0;  R[5] = 1.0;  R[9] = 0.0;  R[13] = 0.0;
     R[2] = -sin(a);  R[6] = 0.0;  R[10] = cos(a);  R[14] = 0.0;
     R[3] = 0.0;  R[7] = 0.0;  R[11] = 0.0;  R[15] = 1.0;
 
-    glMultMatrixf(R);
+    glMultMatrixd(R);
 }
 
 
@@ -127,10 +127,10 @@ display_mesh() {
             start = t[i][0];
             mid = t[i][1];
             end = t[i][2];
-            glNormal3f(n[i][0], n[i][1], n[i][2]);
-            glVertex3f(x[start][0], x[start][1], x[start][2]);
-            glVertex3f(x[mid][0], x[mid][1], x[mid][2]);
-            glVertex3f(x[end][0], x[end][1], x[end][2]);
+            glNormal3d(n[i][0], n[i][1], n[i][2]);
+            glVertex3d(x[start][0], x[start][1], x[start][2]);
+            glVertex3d(x[mid][0], x[mid][1], x[mid][2]);
+            glVertex3d(x[end][0], x[end][1], x[end][2]);
         }
         glEnd();
 
@@ -144,8 +144,8 @@ display_mesh() {
         for (int i = 0; i < edges; i++) {
             start = e[i][0];
             end = e[i][1];
-            glVertex3f(x[start][0], x[start][1], x[start][2]);
-            glVertex3f(x[end][0], x[end][1], x[end][2]);
+            glVertex3d(x[start][0], x[start][1], x[start][2]);
+            glVertex3d(x[end][0], x[end][1], x[end][2]);
         }
         glEnd();
 
@@ -218,22 +218,12 @@ reshape_mesh(int width, int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     if (width > height) {
-        glScalef((double) height / width, 1.0, 1.0);
+        glScaled((double) height / width, 1.0, 1.0);
     } else {
-        glScalef(1.0, (double) width / height, 1.0);
+        glScaled(1.0, (double) width / height, 1.0);
     }
 
-    /*Perspektive festlegen:
-    Dabei wird das Objekt in 3D gezeichnet und
-    dann auf eine Flaeche projeziert
-    1. Winkel entlang der Y-Achse
-    2. Aspektratio entlang X-Achse (Verhaeltnis
-    Breite zu Hoehe)
-    3.Entfernung Betrachter zur nahen Z-Flaeche
-    4.Entfernung Betrachter zur fernen Z-Flaeche
-    */
-    gluPerspective(35.0, 1.0, 1.0, 300.0);
-
+    gluPerspective(50.0, 1.0, 1.0, 30.0);
 
 }
 
@@ -247,16 +237,12 @@ mouse_mesh(int button, int state, int position_y, int position_x) {
     if (button == 3) zoomFactor += 0.25;
     if (button == 4) zoomFactor -= 0.25;
 
-    /*Ersetzten der alten Positionen durch die neu
-    ermittelten*/
     old_position_x = position_x;
     old_position_y = position_y;
 
     old_angle_x = angle_x;
     old_angle_y = angle_y;
 
-    /*sorgt dafuer, dass die display wieder aufgerufen
-    wird und damit die Veraenderungen gezeichnet*/
     glutPostRedisplay();
 
 }
@@ -314,7 +300,7 @@ key_mesh(unsigned char key, int x, int y) {
             trans_y -= 0.5;
             break;
         case 'r':
-            zoomFactor = 0.0;
+            zoomFactor = 1.0;
             angle_x = 0.0;
             angle_y = 0.0;
             trans_x = 0.0;
@@ -328,10 +314,45 @@ key_mesh(unsigned char key, int x, int y) {
 
 }
 
-void normalize() {
+void normalize(psurface3d sur) {
 
+    // get average x, y and z values
+    double x_avg = 0;
+    double y_avg = 0;
+    double z_avg = 0;
+    double radius = 0;
 
+    for (int i = 0; i < sur->vertices; i++) {
+        x_avg += sur->x[i][0];
+        y_avg += sur->x[i][1];
+        z_avg += sur->x[i][2];
+    }
 
+    x_avg /= sur->vertices;
+    y_avg /= sur->vertices;
+    z_avg /= sur->vertices;
+
+    for (int i = 0; i < sur->vertices; i++) {
+        sur->x[i][0] -= x_avg;
+        sur->x[i][1] -= y_avg;
+        sur->x[i][2] -= z_avg;
+    }
+
+    // get the max radius of a bounding sphere containing the object
+    for (int i = 0; i < sur->vertices; i++) {
+        double dx = sur->x[i][0] - x_avg;
+        double dy = sur->x[i][1] - y_avg;
+        double dz = sur->x[i][2] - z_avg;
+        double norm = SQRT(dx*dx + dy*dy + dz*dz);
+        if (radius < norm) radius = norm;
+    }
+
+    // normalize
+    for (int i = 0; i < sur->vertices; i++) {
+        for (int j = 0; j < 3; j++) {
+            sur->x[i][j] /= 1.5 * radius;
+        }
+    }
 
 }
 
@@ -344,11 +365,13 @@ main(int argc, char **argv) {
     /* Reading mesh */
     if (argc > 1) {
         gr = read_surface3d(argv[1]);
-        printf("read %s", argv[1]);
+        printf("read %s\n", argv[1]);
     } else {
         printf("No input file!\n");
         return EXIT_SUCCESS;
     }
+
+    normalize(gr);
 
     glutInit(&argc, argv);
     glutCreateWindow("P6 Triangulation");

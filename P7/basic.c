@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 #ifdef __WIN32__
-#  include <Windows.h>
-#  include <MMSystem.h>
+#  include <windows.h>
+#  include <mmsystem.h>
 
   struct _stopwatch {
     DWORD start;
