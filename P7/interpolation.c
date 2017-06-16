@@ -51,7 +51,7 @@ setup_chebyshev_interpolationpoints(pinterpolation inter, double a, double b) {
     int m = inter->m;
     double *x = inter->xi;
     for (int i = 0; i < m + 1; i++) {
-        x[i] = a + (b - a) / 2 * (cos((2 * i + 1) / (2.0 * (m + 1)) * M_PI) + 1);
+        x[i] = ((a+b)/2) + (b - a) / 2 * (cos((2 * i + 1) / (2.0 * (m + 1)) * M_PI) + 1);
     }
 
 }
