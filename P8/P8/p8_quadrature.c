@@ -28,6 +28,8 @@
 
 double euler = 2.71828182845904523536;
 
+int window;
+
 /* ------------------------------------------------------------
 * Example function
 *-------------------------------------------------------------*/
@@ -40,14 +42,43 @@ double example_function(double x) {
 /* ------------------------------------------------------------
 * GLUT functions
 *-------------------------------------------------------------*/
+static void
+reshape(int width, int height) {
 
-  /* ---------------------------------------------- */
-  /*                                                */
-  /* T T T T T     O O       D D           O O      */
-  /*     T        O   O      D   D        O   O     */
-  /*     T       O     O     D     D     O     O    */
-  /*     T       O     O     D     D     O     O    */
-  /*     T        O   O      D   D        O   O     */
-  /*     T         O O       D D           O O      */
-  /*                                                */
-  /* ---------------------------------------------- */
+    glLoadIdentity();
+    if (width > height) {
+        glScalef((GLfloat) height / width, 1.0, 1.0);
+    } else {
+        glScalef(1.0, (GLfloat) width / height, 1.0);
+    }
+
+}
+
+static void
+key(unsigned char key, int x, int y) {
+    (void) x;
+    (void) y;
+
+    switch (key) {
+
+        case '1':
+            printf("did nothing at all.\n");
+            break;
+		}
+}
+
+int main(int argc, char **argv) {
+
+		glutInit(&argc, argv);
+
+		window = glutCreateWindow("Bullshit");
+		glutPositionWindow(150, 100);
+		glutReshapeWindow(500	, 500);
+		glutReshapeFunc(reshape);
+		glutKeyboardFunc(key);
+
+		glutMainLoop();
+
+
+		return 0;
+}

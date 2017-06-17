@@ -86,7 +86,7 @@ eval_quadrature(pquadrature quad, double a, double b, function f, void *data){
   /*     T         O O       D D           O O      */
   /*                                                */
   /* ---------------------------------------------- */
-
+return 0;
 }
 
 double
@@ -102,5 +102,5 @@ eval_composite_quadrature(pquadrature quad, double a, double b, int n, function 
   /*     T         O O       D D           O O      */
   /*                                                */
   /* ---------------------------------------------- */
-
+return 0;
 }
