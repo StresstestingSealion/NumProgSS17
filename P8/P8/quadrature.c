@@ -84,12 +84,14 @@ eval_quadrature(pquadrature quad, double a, double b, function f, void *data){
 double sum = 0.0;
 int m = quad->m;
 int i;
-double* x = malloc(m * sizeof(double));
+double* x = malloc((m+1) * sizeof(double));
 map_quadrature_points(quad, a, b, x);
 
 for(i = 0; i <= m; i++){
 	sum += quad->w[i] * f(x[i], data);
 	}
+
+free(x);
 
 sum *= ((b - a) / 2);
 return sum;
