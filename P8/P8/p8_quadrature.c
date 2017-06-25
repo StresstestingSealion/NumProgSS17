@@ -26,7 +26,6 @@
 * Global variable
 *-------------------------------------------------------------*/
 
-double e = 2.71828182845904523536;
 
 int window;
 int window_size_x = 500;
@@ -43,9 +42,9 @@ double precisision = 0.000001;
 * Example function
 *-------------------------------------------------------------*/
 
-double exampleFunction(double x, void *data) {
-	x = ((pow(5 * e, 2 * x)) * cos(x)) / (pow(e, M_PI) -2);
-	return x/15; //compensate for ridiculous scaling
+
+double exampleFunction(double x, void *data){
+	return (5 * exp(2 * x) * cos(x)) / (exp(M_PI) - 2);
 }
 
 /* ------------------------------------------------------------
@@ -133,7 +132,7 @@ for(i = 0; i < interpolationPoints; i++){
 glEnd();
 
 sum = eval_composite_quadrature(quad, 0, M_PI/2, interpolationPoints, &exampleFunction, data);
-printf("Integrated area: %f\n", sum*15);	//more scaling
+printf("Integrated area: %f\n", sum);
 
 glFlush();
   
