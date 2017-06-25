@@ -158,12 +158,6 @@ key(unsigned char key, int x, int y){
 	(void) y;
 	
 	switch (key){
-	  case 'a':		interpolationPoints -= 1;
-				glutPostRedisplay();
-				break;
-	  case 'q':		interpolationPoints += 1;
-				glutPostRedisplay();
-				break;
 	  case '1':		quad = setup_midpointrule();
 				glutPostRedisplay();
 				break;
