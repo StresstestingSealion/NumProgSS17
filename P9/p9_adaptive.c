@@ -33,8 +33,6 @@
 * Global variable
 *-------------------------------------------------------------*/
 
-
-int window;
 int window_size_x = 500;
 int window_size_y = 500;
 int interpolationPoints = 1;
@@ -42,17 +40,27 @@ int interpolationPoints = 1;
 pquadrature quad;
 
 double data[2];
+double x_min = 0.0;
 double x_max = M_PI / 2;
-double precisision = 0.000001;
+
+// some colors :)
+typedef float color[3];
+color COLOR_RED = {1.0, 0.0, 0.0};
+color COLOR_GREEN = {0.0, 1.0, 0.0};
+color COLOR_BLUE = {0.0, 0.0, 1.0};
+color COLOR_BLACK = {0.0, 0.0, 0.0};
+color COLOR_WHITE = {1.0, 1.0, 1.0};
+
+
 
 /* ------------------------------------------------------------
 * Example function
 *-------------------------------------------------------------*/
 
-
 double exampleFunction(double x, void *data) {
     return (5 * exp(2 * x) * cos(x)) / (exp(M_PI) - 2);
 }
+
 
 /* ------------------------------------------------------------
 * GLUT functions
@@ -60,84 +68,88 @@ double exampleFunction(double x, void *data) {
 
 static void reshape(int width, int height) {
 
-    glViewport(0, 0, width, height);
     glLoadIdentity();
-
     if (width > height) {
-        glScalef((double) height / width, 1.0, 1.0);
+        glScaled((double) height / width, 1.0, 1.0);
     } else {
-        glScalef(1.0, (double) width / height, 1.0);
+        glScaled(1.0, (double) width / height, 1.0);
     }
+
 }
 
-static void createCoordinateSystem() {
 
-    glColor3d(0.0, 0.0, 0.0);
+static void draw_coordinates() {
+
+    glColor3f(0.0, 0.0, 0.0);
     glBegin(GL_LINES);
-    glVertex2f(-1.0, 0.0);
-    glVertex2f(1.0, 0.0);
-
-    glVertex2f(0.0, 1.0);
-    glVertex2f(0.0, -1.0);
-
-    for (int i = 0; i <= 10; i++) {
-
-        glVertex2f(1.0 / 10 * i, -0.05);
-        glVertex2f(1.0 / 10 * i, 0.05);
-        glVertex2f(-1.0 / 10 * i, -0.05);
-        glVertex2f(-1.0 / 10 * i, 0.05);
-        glVertex2f(-0.05, 1.0 / 10 * i);
-        glVertex2f(0.05, 1.0 / 10 * i);
-        glVertex2f(-0.05, -1.0 / 10 * i);
-        glVertex2f(0.05, -1.0 / 10 * i);
-    }
-
+    glVertex2d(-1.0, 0.0);
+    glVertex2d(1.0, 0.0);
+    glVertex2d(0.0, 1.0);
+    glVertex2d(0.0, -1.0);
     glEnd();
 
+}
+
+
+static void draw_example_func(color c) {
+
+    glColor3fv(c);
+    glBegin(GL_LINE_STRIP);
+    for (double x = 0.0; x <= x_max; x += 0.01) {
+        glVertex2d(x / 2, exampleFunction(x, data));
+    }
+    glEnd();
+
+}
+
+
+static void draw_quadrature(color c) {
+
+    double x1, x2;
+    double a = x_min;
+    double b = x_max;
+
+    glColor3fv(c);
+    glBegin(GL_LINE_STRIP);
+    glColor3f(0.0, 0.8, 0.0);
+
+    for (int i = 0; i < interpolationPoints; i++) {
+
+        x1 = a + (b - a) / interpolationPoints * i;
+        x2 = a + (b - a) / interpolationPoints * (i + 1);
+
+        glVertex2d(x1 / 2, 0);
+
+        if (quad->m == 0) {
+            glVertex2d(x1 / 2, exampleFunction((x1 + x2) / 2, data));
+            glVertex2d(x2 / 2, exampleFunction((x1 + x2) / 2, data));
+        } else {
+            glVertex2d(x1 / 2, exampleFunction(x1, data));
+            glVertex2d(x2 / 2, exampleFunction(x2, data));
+        }
+        glVertex2d(x2 / 2, 0);
+    }
+    glEnd();
+
+}
+
+void print_sum() {
+    double sum = eval_composite_quadrature(quad, 0, M_PI / 2, interpolationPoints, &exampleFunction, data);
+    printf("Integrated area: %f\n", sum);
 }
 
 static void display() {
 
-    double x, x1, x2, sum;
-    int i;
-    double a = 0;
-    double b = M_PI / 2;
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    int width = glutGet(GLUT_WINDOW_WIDTH);
+    int height = glutGet(GLUT_WINDOW_HEIGHT);
+    glViewport(0, 0, width, height);
 
-    createCoordinateSystem();
-
+    glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
-    glPointSize(2.0);
-    glBegin(GL_LINE_STRIP);
-
-    for (x = 0.0; x <= M_PI / 2; x += precisision) {
-        glColor3f(0.8, 0.0, 0.0);
-        glVertex2f(x / 2, exampleFunction(x, data));
-    }
-
-    glEnd();
-    glBegin(GL_LINE_STRIP);
-    glColor3f(0.0, 0.8, 0.0);
-
-    for (i = 0; i < interpolationPoints; i++) {
-        x1 = a + (b - a) / interpolationPoints * i;
-        x2 = a + (b - a) / interpolationPoints * (i + 1);
-        glVertex2f(x1 / 2, 0);
-
-        if (quad->m == 0) {
-            glVertex2f(x1 / 2, exampleFunction((x1 + x2) / 2, data));
-            glVertex2f(x2 / 2, exampleFunction((x1 + x2) / 2, data));
-        } else {
-            glVertex2f(x1 / 2, exampleFunction(x1, data));
-            glVertex2f(x2 / 2, exampleFunction(x2, data));
-        }
-        glVertex2f(x2 / 2, 0);
-    }
-    glEnd();
-
-    sum = eval_composite_quadrature(quad, 0, M_PI / 2, interpolationPoints, &exampleFunction, data);
-    printf("Integrated area: %f\n", sum);
+    draw_coordinates();
+    draw_example_func(COLOR_RED);
+    draw_quadrature(COLOR_GREEN);
 
     glFlush();
 
@@ -178,6 +190,7 @@ key(unsigned char key, int x, int y) {
         default :
             break;
     }
+    print_sum();
 }
 
 int main(int argc, char **argv) {
@@ -188,14 +201,13 @@ int main(int argc, char **argv) {
     quad = setup_midpointrule();
 
     glutInit(&argc, argv);
-
-    window = glutCreateWindow("Quadrature");
+    glutCreateWindow("Quadrature");
     glutPositionWindow(150, 150);
-    glutReshapeWindow(window_size_x, window_size_y);
+    glutReshapeWindow(500, 500);
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(key);
-
     glutMainLoop();
     return 0;
+
 }

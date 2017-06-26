@@ -97,7 +97,7 @@ static void display() {
     double b = M_PI / 2;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    createCoordinateSystem();
+    coordinates();
 
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
