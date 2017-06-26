@@ -134,7 +134,7 @@ static void draw_quadrature(color c) {
 }
 
 void print_sum() {
-    double sum = eval_composite_quadrature(quad, 0, M_PI / 2, interpolationPoints, &exampleFunction, data);
+    double sum = eval_composite_quadrature(quad, x_min, x_max, interpolationPoints, &exampleFunction, data);
     printf("Integrated area: %f\n", sum);
 }
 
