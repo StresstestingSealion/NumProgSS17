@@ -1,0 +1,25 @@
+CC = gcc
+
+CFLAGS = -Wall -Werror \
+	 -O3 -funroll-loops -march=native -mtune=native \
+         -std=c99
+
+all: p10_crs
+
+basic.o: basic.c basic.h
+	$(CC) -c $(CFLAGS) $< -o $@ 
+
+miniblas.o: miniblas.c miniblas.h basic.h
+	$(CC) -c $(CFLAGS) $< -o $@ 
+
+matrix.o: matrix.c matrix.h miniblas.h
+	$(CC) -c $(CFLAGS) $< -o $@ 
+	
+crs.o: crs.c crs.h basic.h matrix.h
+	$(CC) -c $(CFLAGS) $< -o $@ 
+
+p10_crs: p10_crs.o basic.o matrix.o miniblas.o crs.o
+	$(CC) $^ -o  $@ -lwinmm
+
+p10_crs.o: p10_crs.c crs.h matrix.h miniblas.h
+	$(CC) $(CFLAGS) -c $< -o $@
