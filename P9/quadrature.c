@@ -116,7 +116,7 @@ eval_composite_quadrature(pquadrature midpointquad, pquadrature trapezoidquad, d
 
 		m = eval_quadrature(midpointquad, a, b, f, data);
 		t = eval_quadrature(trapezoidquad, a, b, f, data);
-		if(epsilon < calculate_relative_error(m, t)){
+		if(ABS(t-m) <= epsilon * ABS(m)){
 			sum += eval_composite_quadrature(midpointquad, trapezoidquad, a, b - (b - a) / 2, epsilon, f, data, steps);
 			sum += eval_composite_quadrature(midpointquad, trapezoidquad, a + (b - a) / 2, b, epsilon, f, data, steps);
 		}
