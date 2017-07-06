@@ -46,7 +46,7 @@ main(void){
   theta = 0.000001;
   h = 1.0/(m+1);
 
-  //theta = 2 / (4.0/h/h * sinus(h *0.5, data) * sinus(h *0.5, data));
+  theta = 2 / (4.0/h/h * sinus(h *0.5, data) * sinus(h *0.5, data));
  
   printf("Solve poisson equation with Richardson iteration\n");
   printf("-----------------------------------------\n");
