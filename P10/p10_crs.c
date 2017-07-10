@@ -43,7 +43,7 @@ main(void){
 
   m = 5;					/* problem dimension */
   data[0] = 1.0;
-  theta = 0.000001;
+  // theta = 0.000001;
   h = 1.0/(m+1);
 
   theta = 2 / (4.0/h/h * sinus(h *0.5, data) * sinus(h *0.5, data));
@@ -61,6 +61,7 @@ main(void){
     for(i = 0; i < m; i++){
     printf("%f\n", b->x[i]);
   }
+
   /* solve with Richardson iteration */
   richardson_iteration(crs, x, theta, b, 1.e-7);
   printf("-----------------------------------------\n");

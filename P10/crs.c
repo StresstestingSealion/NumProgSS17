@@ -59,38 +59,68 @@ del_crsmatrix(pcrsmatrix crs) {
 pcrsmatrix
 setup_poisson(unsigned int m) {
 
-    pcrsmatrix crs = new_crsmatrix(m, m);
-
     double h_2 = 1.0 / ((m + 1) * (m + 1));
     int nze = 3 * (m - 2) + 4;
 
+    pcrsmatrix crs = new_crsmatrix(m,m);
     crs->Aa = (double *) malloc(nze * sizeof(double));
     crs->Aj = (unsigned int *) malloc(nze * sizeof(unsigned int));
     crs->Ai = (unsigned int *) malloc((m + 1) * sizeof(unsigned int));
 
-    for (int i = 0; i < nze; i++) {
-        if (i % 3 == 0)
-            crs->Aa[i] = 2 * h_2;
-        else
-            crs->Aa[i] = -1 * h_2;
+    switch(m) {
+        case 1:
+            crs->Aa[0] = 2 * h_2;
+            crs->Aj[0] = 1;
+            crs->Ai[0] = 0;
+            crs->Ai[1] = 1;
+            break;
+        case 2:
+            crs->Aa[0] = 2 * h_2;
+            crs->Aa[1] = -1 * h_2;
+            crs->Aa[2] = -1 * h_2;
+            crs->Aa[3] = 2 * h_2;
+            crs->Aj[0] = 0;
+            crs->Aj[1] = 1;
+            crs->Aj[2] = 0;
+            crs->Aj[3] = 1;
+            crs->Ai[0] = 0;
+            crs->Ai[1] = 2;
+            crs->Ai[2] = 4;
+            break;
+        default:
+
+            // Aa
+            for (int i = 0; i < nze; i++) {
+                if(i % 3) {
+                    crs->Aa[i] = -1 * h_2;
+                } else {
+                    crs->Aa[i] = 2 * h_2;
+                }
+            }
+
+            // Ai
+            crs->Ai[0] = 0;
+            for (int i = 1; i < m + 1; i++) {
+                if (i == 1 || i == m) {
+                    crs->Ai[i] = crs->Ai[i - 1] + 2;
+                } else {
+                    crs->Ai[i] = crs->Ai[i - 1] + 3;
+                }
+            }
+
+            // Aj
+            for (int i = 0; i < nze; i++) {
+                if (i % 3 == 1)
+                    crs->Aj[i] = (unsigned int) (i / 3 + i % 3);
+                else
+                    crs->Aj[i] = (unsigned int) (i / 3);
+            }
+
+            break;
     }
 
-    for (int i = 0; i < nze; i++) {
-        if (i % 3 == 1)
-            crs->Aj[i] = (unsigned int) (i / 3 + i % 3);
-        else
-            crs->Aj[i] = (unsigned int) (i / 3);
-    }
-
-    crs->Ai[0] = 0;
-    for (int i = 1; i < m + 1; i++) {
-        if (i == 1 || i == m)
-            crs->Ai[i] = crs->Ai[i - 1] + 2;
-        else
-            crs->Ai[i] = crs->Ai[i - 1] + 3;
-    }
+    print_crs(crs);
     return crs;
-
 }
 
 
@@ -130,12 +160,14 @@ print_crs(pcrsmatrix crs) {
             printf(", %d", crs->Ai[i]);
         }
         printf(")\n");
+        printf("\n");
         printf("Column for entries\n");
         printf("(%d, ", crs->Aj[0]);
         for (i = 1; i < nnze - 1; i++) {
             printf("%d, ", crs->Aj[i]);
         }
         printf("%d)\n", crs->Aj[nnze - 1]);
+        printf("\n");
 
     } else {
         printf("Matrix\n");
@@ -155,7 +187,7 @@ mvm_crs(pcrsmatrix crs, pvector x, double alpha, pvector b) {
     for (int i = 0; i < crs->row; i++) {
         nze = crs->Ai[i+1] - crs->Ai[i];
         while (nze--) {
-            b->x[i] += crs->Aa[current] * x->x[crs->Aj[current]];
+            b->x[i] += alpha * crs->Aa[current] * x->x[crs->Aj[current]];
             current++;
         }
     }
@@ -165,6 +197,28 @@ mvm_crs(pcrsmatrix crs, pvector x, double alpha, pvector b) {
 void
 richardson_iteration(pcrsmatrix crs, pvector x, double theta, pvector b, double eps) {
 
+    int n = x->rows;
+    pvector p = new_zero_vector(n);
+    pvector b_copy = new_zero_vector(n);
+
+    for (int i = 0; i < n; i++) {
+        b_copy[i] = b[i];
+    }
+
+    mvm_crs(crs, x, 1, p);                     // p = crs * x
+    axpy(n, -1, p->x, 1, b_copy->x, 1);        // b_copy = b_copy - p
+
+    while (nrm2(n, b->x, 1) > eps) {
+
+        mvm_crs(crs, b_copy, 1, p);                  // a = A * b
+        axpy(n, theta, b->x, 1, x->x, 1);       // x = x + theta * b
+        axpy(n, -theta, p->x, 1, b->x, 1);      // b = b - theta * a
+
+    }
+
+
+
+/*
     pvector err_vec = new_zero_vector(x->rows);
     double err;
 
@@ -173,8 +227,8 @@ richardson_iteration(pcrsmatrix crs, pvector x, double theta, pvector b, double 
     err = nrm2(err_vec->rows, err_vec->x, 1);
 
     while (eps < err) {
-        /*for(int j = 0; j < x->rows; j++)
-            printf("x[%d]=%f\n", j, x->x[j]);*/
+        *//*for(int j = 0; j < x->rows; j++)
+            printf("x[%d]=%f\n", j, x->x[j]);*//*
         mvm_crs(crs, x, -theta, x);
         axpy(x->rows, theta, b->x, 1, x->x, 1);
         //Calculate error
@@ -183,7 +237,8 @@ richardson_iteration(pcrsmatrix crs, pvector x, double theta, pvector b, double 
         axpy(err_vec->rows, -1, b->x, 1, err_vec->x, 1);
         err = nrm2(err_vec->rows, err_vec->x, 1);
         //i++;
-    }
+    }*/
+
 
 }
 
