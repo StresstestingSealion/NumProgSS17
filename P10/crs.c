@@ -20,6 +20,7 @@
 * ------------------------------------------------------------ */
 
 pcrsmatrix
+<<<<<<< Updated upstream
 new_crsmatrix(unsigned int rows, unsigned int cols) {
 
     pcrsmatrix crs;
@@ -50,6 +51,33 @@ del_crsmatrix(pcrsmatrix crs) {
     }
 
     free(crs);
+=======
+new_crsmatrix( unsigned int rows, unsigned int cols){
+
+  pcrsmatrix crs;
+
+  crs = (pcrsmatrix) calloc(1, sizeof(crsmatrix));
+  crs->row = rows;
+  crs->col = cols;
+
+  crs->Aa = NULL;
+  crs->Ai = NULL;
+  crs->Aj = NULL;
+
+  return crs;
+}
+
+void
+del_crsmatrix(pcrsmatrix crs){
+
+  if(crs->Aa){
+    free(crs->Aa);
+  }
+  if(crs->Ai){
+    free(crs->Ai);
+  }
+  free(crs);
+>>>>>>> Stashed changes
 }
 
 /* ------------------------------------------------------------
@@ -57,12 +85,57 @@ del_crsmatrix(pcrsmatrix crs) {
 * ------------------------------------------------------------ */
 
 pcrsmatrix
+<<<<<<< Updated upstream
 setup_poisson(unsigned int m) {
 
+<<<<<<< Updated upstream
     double h_2 = 1.0 / ((m + 1) * (m + 1));
     int nze = 3 * (m - 2) + 4;
 
     pcrsmatrix crs = new_crsmatrix(m,m);
+=======
+    pcrsmatrix crs = new_crsmatrix(m, m);
+=======
+setup_poisson(unsigned int m){
+	pcrsmatrix crs = new_crsmatrix(m, m);
+	double h_2 = 1.0 / ((m + 1) * (m + 1));
+	int nze = 3 * (m - 2) + 4;
+	int i;
+	crs->Aa = (double*) malloc(nze * sizeof(double));
+	crs->Aj = (unsigned int*) malloc(nze * sizeof(unsigned int));
+	crs->Ai = (unsigned int*) malloc((m + 1) * sizeof(unsigned int));
+
+	for(i = 0; i < nze; i++){
+		if(i % 3 == 0)
+			crs->Aa[i] = 2 * h_2;
+		else
+			crs->Aa[i] = -1 * h_2;
+	}
+
+	for(i = 0; i < nze; i++){
+		if(i % 3 == 1)
+			crs->Aj[i] = i / 3 + i % 3;
+		else
+			crs->Aj[i] = i / 3;
+	}
+
+	crs->Ai[0] = 0;
+	for(i = 1; i < m + 1; i++){
+		if(i == 1 || i == m)
+			crs->Ai[i] = crs->Ai[i - 1] + 2;
+		else
+			crs->Ai[i] = crs->Ai[i - 1] + 3;
+	}
+	print_crs(crs);
+	return crs;
+}
+>>>>>>> Stashed changes
+
+    double h_2 = 1.0 / ((m + 1) * (m + 1));
+    int nze = 3 * (m - 2) + 4;
+
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
     crs->Aa = (double *) malloc(nze * sizeof(double));
     crs->Aj = (unsigned int *) malloc(nze * sizeof(unsigned int));
     crs->Ai = (unsigned int *) malloc((m + 1) * sizeof(unsigned int));
@@ -121,12 +194,27 @@ setup_poisson(unsigned int m) {
 
     print_crs(crs);
     return crs;
+<<<<<<< Updated upstream
+=======
+
+=======
+void
+set_righthandside(int m, function f, void *data, pvector b){
+  double h = 1.0/(m+1);
+  unsigned int i;
+
+  for(i = 0; i < b->rows; i++){
+    b->x[i] = f((i+1)*h, data);
+  }
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
 
 
 void
 set_righthandside(int m, function f, void *data, pvector b) {
 
+<<<<<<< Updated upstream
     double h = 1.0 / (m + 1);
     for (int i = 0; i < b->rows; i++) {
         b->x[i] = f((i + 1) * h, data);
@@ -175,10 +263,40 @@ print_crs(pcrsmatrix crs) {
     }
 
 
+=======
+  unsigned int ze = crs->Ai[crs->row];
+  unsigned int i;
+
+  if(ze >1){
+    printf("nze:\n");
+    printf("(%f,  ", crs->Aa[0]);
+    for(i = 1; i < ze-1; i++){
+      printf("%f,  ", crs->Aa[i]);
+    }
+    printf("%f)\n", crs->Aa[ze-1]);
+    printf("\n");
+    printf("Nr. of row entries:\n(%d", crs->Ai[0]);
+    for(i = 1; i <= crs->row; i++){
+      printf(", %d", crs->Ai[i]);
+    }
+    printf(")\n");
+    printf("Column:\n");
+    printf("(%d, ", crs->Aj[0]);
+    for(i = 1; i < ze-1; i++){
+      printf("%d, ", crs->Aj[i]);
+    }
+    printf("%d)\n", crs->Aj[ze-1]);
+
+  }
+  else{
+    printf("Matrix\n");
+    printf("(%f ) \n", crs->Aa[0]);
+  }
+>>>>>>> Stashed changes
 }
 
-
 void
+<<<<<<< Updated upstream
 mvm_crs(pcrsmatrix crs, pvector x, double alpha, pvector b) {
 
     unsigned int nze;           // number of nze in current row
@@ -191,10 +309,24 @@ mvm_crs(pcrsmatrix crs, pvector x, double alpha, pvector b) {
             current++;
         }
     }
+=======
+mvm_crs(pcrsmatrix crs, pvector x, double alpha, pvector b){
+	int current = crs->Ai[0];
+	double j;
+
+	for(int i = 0; i < crs->row; i++){
+		j = crs->Ai[i + 1] - crs->Ai[i];
+		while(j-- > 0){
+			b->x[i] += alpha * crs->Aa[current] * x->x[current];
+			current++;
+		}
+	}
+>>>>>>> Stashed changes
 }
 
 
 void
+<<<<<<< Updated upstream
 richardson_iteration(pcrsmatrix crs, pvector x, double theta, pvector b, double eps) {
 
     int n = x->rows;
@@ -240,5 +372,23 @@ richardson_iteration(pcrsmatrix crs, pvector x, double theta, pvector b, double 
     }*/
 
 
-}
+=======
+richardson_iteration(pcrsmatrix crs, pvector x, double theta, pvector b, double eps){
+	pvector err_vec;
+	double err;
+	err_vec = new_zero_vector(x->rows);
+	mvm_crs(crs, x, 1, err_vec);
+	axpy(err_vec->rows, -1, b->x, 1, err_vec->x, 1);
+	err = nrm2(err_vec->rows, err_vec->x, 1);
 
+	while(eps < err){
+		mvm_crs(crs, x, -theta, x);
+		axpy(x->rows, theta, b->x, 1, x->x, 1);
+
+		err_vec = new_zero_vector(x->rows);
+		mvm_crs(crs, x, 1, err_vec);
+		axpy(err_vec->rows, -1, b->x, 1, err_vec->x, 1);
+		err = nrm2(err_vec->rows, err_vec->x, 1);
+	}
+>>>>>>> Stashed changes
+}
