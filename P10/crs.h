@@ -52,7 +52,7 @@ set_righthandside(int m, function f, void *data, pvector b);
 
  /* matrix vector multiplication */
 void
-mvm_crs(pcrsmatrix crs, pvector x, double alpha, pvector b);
+mvm_crs(pcrsmatrix A, pvector x, double alpha, pvector b);
 
 void
 print_crs(pcrsmatrix crs);
@@ -61,5 +61,5 @@ print_crs(pcrsmatrix crs);
     defect norm tolerance eps and right hand side b, for
     lienar system of equations crs * x = b.  */
 void
-richardson_iteration(pcrsmatrix crs, pvector x, double theta, pvector b, double eps);
+richardson_iteration(pcrsmatrix A, pvector x, double theta, pvector b, double eps);
   #endif

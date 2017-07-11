@@ -8,8 +8,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
-#include <math.h>
 #include "crs.h"
 #include "miniblas.h"
 #include "matrix.h"
@@ -92,9 +90,9 @@ setup_poisson(unsigned int m) {
             // Aa
             for (int i = 0; i < nze; i++) {
                 if(i % 3) {
-                    crs->Aa[i] = -1 * h_2;
+                    crs->Aa[i] = -1;
                 } else {
-                    crs->Aa[i] = 2 * h_2;
+                    crs->Aa[i] = 2;
                 }
             }
 
@@ -179,15 +177,17 @@ print_crs(pcrsmatrix crs) {
 
 
 void
-mvm_crs(pcrsmatrix crs, pvector x, double alpha, pvector b) {
+mvm_crs(pcrsmatrix A, pvector x, double alpha, pvector b) {
 
     unsigned int nze;           // number of nze in current row
     unsigned int current = 0;   // pointer to current element in Aa
 
-    for (int i = 0; i < crs->row; i++) {
-        nze = crs->Ai[i+1] - crs->Ai[i];
+
+    for (int i = 0; i < A->row; i++) {
+        nze = A->Ai[i+1] - A->Ai[i];
+        b->x[i] = 0;
         while (nze--) {
-            b->x[i] += alpha * crs->Aa[current] * x->x[crs->Aj[current]];
+            b->x[i] += alpha * A->Aa[current] * x->x[A->Aj[current]];
             current++;
         }
     }
@@ -195,45 +195,38 @@ mvm_crs(pcrsmatrix crs, pvector x, double alpha, pvector b) {
 
 
 void
-richardson_iteration(pcrsmatrix crs, pvector x, double theta, pvector b, double eps) {
+richardson_iteration(pcrsmatrix A, pvector x, double theta, pvector b, double eps) {
 
     int n = x->rows;
     pvector p = new_zero_vector(n);
-    pvector b_copy = new_zero_vector(n);
 
-    for (int i = 0; i < n; i++) {
-        b_copy[i] = b[i];
-    }
 
-    mvm_crs(crs, x, 1, p);                     // p = crs * x
-    axpy(n, -1, p->x, 1, b_copy->x, 1);        // b_copy = b_copy - p
+    mvm_crs(A, x, 1, p);                    // p = A * x
+    axpy(n, -1, p->x, 1, b->x, 1);          // b = b - Ax
 
     while (nrm2(n, b->x, 1) > eps) {
 
-        mvm_crs(crs, b_copy, 1, p);                  // a = A * b
+        mvm_crs(A, b, 1, p);                  // a = A * b
         axpy(n, theta, b->x, 1, x->x, 1);       // x = x + theta * b
         axpy(n, -theta, p->x, 1, b->x, 1);      // b = b - theta * a
-
     }
-
-
 
 /*
     pvector err_vec = new_zero_vector(x->rows);
     double err;
 
-    mvm_crs(crs, x, 1, err_vec);
+    mvm_crs(A, x, 1, err_vec);
     axpy(err_vec->rows, -1, b->x, 1, err_vec->x, 1);
     err = nrm2(err_vec->rows, err_vec->x, 1);
 
     while (eps < err) {
         *//*for(int j = 0; j < x->rows; j++)
             printf("x[%d]=%f\n", j, x->x[j]);*//*
-        mvm_crs(crs, x, -theta, x);
+        mvm_crs(A, x, -theta, x);
         axpy(x->rows, theta, b->x, 1, x->x, 1);
         //Calculate error
         err_vec = new_zero_vector(x->rows);
-        mvm_crs(crs, x, 1, err_vec);
+        mvm_crs(A, x, 1, err_vec);
         axpy(err_vec->rows, -1, b->x, 1, err_vec->x, 1);
         err = nrm2(err_vec->rows, err_vec->x, 1);
         //i++;
