@@ -42,14 +42,11 @@ main(void){
   // theta = 0.000001;
   h = 1.0/(m+1);
 
-<<<<<<< Updated upstream
   theta = 2 / (4.0/h/h * sinus(h *0.5, data) * sinus(h *0.5, data));
  
   printf("Solve poisson equation with Richardson iteration\n");
   printf("-----------------------------------------\n");
-=======
   printf("Apply Richardson Iteration:\n");
->>>>>>> Stashed changes
 
   crs = setup_poisson(m);
   b = new_zero_vector(m);
@@ -61,10 +58,7 @@ main(void){
     printf("%f\n", b->x[i]);
   }
 
-<<<<<<< Updated upstream
   /* solve with Richardson iteration */
-=======
->>>>>>> Stashed changes
   richardson_iteration(crs, x, theta, b, 1.e-7);
   printf("Solution\n");
   	lambda = sinus(h *0.5, data);

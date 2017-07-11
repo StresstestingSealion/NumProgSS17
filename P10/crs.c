@@ -90,9 +90,9 @@ setup_poisson(unsigned int m) {
             // Aa
             for (int i = 0; i < nze; i++) {
                 if(i % 3) {
-                    crs->Aa[i] = -1;
+                    crs->Aa[i] = -1 * h_2;
                 } else {
-                    crs->Aa[i] = 2;
+                    crs->Aa[i] = 2 * h_2;
                 }
             }
 
